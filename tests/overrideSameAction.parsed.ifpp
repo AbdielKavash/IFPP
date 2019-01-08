@@ -1,0 +1,19 @@
+[2] Rule {
+	[0] Identified true
+	[1] CustomAlertSound "Identified"
+}
+
+[6] Rule {
+	[4] Corrupted true
+	[5] Override CustomAlertSound "Corrupted"
+}
+
+[10] Rule {
+	[8] ShaperItem true
+	[9] Override CustomAlertSound "ShaperItem"
+}
+
+[14] Rule {
+	[12] ElderItem true
+	[13] Override CustomAlertSound "ElderItem"
+}

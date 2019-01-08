@@ -1,0 +1,9 @@
+[2] Rule {
+	[0] ItemLevel <= 49
+	[1] CustomAlertSound "Less than 50"
+}
+
+[6] Rule {
+	[4] ItemLevel <= 29
+	[5] Override CustomAlertSound "Less than 30"
+}

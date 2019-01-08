@@ -1,0 +1,450 @@
+Starting parse
+Entering state 0
+Reducing stack by rule 1 (line 360):
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "Define" (1.1-6: )
+Shifting token "Define" (1.1-6: )
+Entering state 6
+Reducing stack by rule 14 (line 388):
+   $1 = token "Define" (1.1-6: )
+-> $$ = nterm defineOrRedefine (1.1-6: 0)
+Stack now 1 0
+Entering state 11
+Reading a token: Next token is token "variable" (1.8-9: $n)
+Shifting token "variable" (1.8-9: $n)
+Entering state 17
+Reading a token: Next token is token "Number" (1.11-16: Number)
+Shifting token "Number" (1.11-16: Number)
+Entering state 21
+Reading a token: Next token is token "number" (1.18-20: 100)
+Shifting token "number" (1.18-20: 100)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (1.18-20: 100)
+-> $$ = nterm exprNumber (1.18-20: 100)
+Stack now 21 17 11 1 0
+Entering state 63
+Reading a token: Next token is token "end of line" (1.21-2.0: )
+Shifting token "end of line" (1.21-2.0: )
+Entering state 110
+Reducing stack by rule 8 (line 374):
+   $1 = nterm defineOrRedefine (1.1-6: 0)
+   $2 = token "variable" (1.8-9: $n)
+   $3 = token "Number" (1.11-16: Number)
+   $4 = nterm exprNumber (1.18-20: 100)
+   $5 = token "end of line" (1.21-2.0: )
+-> $$ = nterm definition (1.1-2.0: [0] Define $n Number 100
+
+)
+Stack now 1 0
+Entering state 10
+Reducing stack by rule 3 (line 362):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1: )
+   $2 = nterm definition (1.1-2.0: [0] Define $n Number 100
+
+)
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-2.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (2.1-3.0: )
+Shifting token "end of line" (2.1-3.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-2.0: )
+   $2 = token "end of line" (2.1-3.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-3.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "Define" (3.1-6: )
+Shifting token "Define" (3.1-6: )
+Entering state 6
+Reducing stack by rule 14 (line 388):
+   $1 = token "Define" (3.1-6: )
+-> $$ = nterm defineOrRedefine (3.1-6: 0)
+Stack now 1 0
+Entering state 11
+Reading a token: Next token is token "variable" (3.8-9: $a)
+Shifting token "variable" (3.8-9: $a)
+Entering state 17
+Reading a token: Next token is token "Color" (3.11-15: Color)
+Shifting token "Color" (3.11-15: Color)
+Entering state 22
+Reading a token: Next token is token "variable" (3.17-18: $n)
+Shifting token "variable" (3.17-18: $n)
+Entering state 65
+Reading a token: Next token is token "number" (3.20-21: 10)
+Reducing stack by rule 101 (line 586):
+   $1 = token "variable" (3.17-18: $n)
+-> $$ = nterm varNumber (3.17-18: 100)
+Stack now 22 17 11 1 0
+Entering state 64
+Reducing stack by rule 88 (line 547):
+   $1 = nterm varNumber (3.17-18: 100)
+-> $$ = nterm exprNumber (3.17-18: 100)
+Stack now 22 17 11 1 0
+Entering state 67
+Next token is token "number" (3.20-21: 10)
+Shifting token "number" (3.20-21: 10)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (3.20-21: 10)
+-> $$ = nterm exprNumber (3.20-21: 10)
+Stack now 67 22 17 11 1 0
+Entering state 111
+Reading a token: Next token is token "number" (3.23-24: 10)
+Shifting token "number" (3.23-24: 10)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (3.23-24: 10)
+-> $$ = nterm exprNumber (3.23-24: 10)
+Stack now 111 67 22 17 11 1 0
+Entering state 145
+Reading a token: Next token is token "end of line" (3.25-4.0: )
+Reducing stack by rule 93 (line 557):
+   $1 = nterm exprNumber (3.17-18: 100)
+   $2 = nterm exprNumber (3.20-21: 10)
+   $3 = nterm exprNumber (3.23-24: 10)
+-> $$ = nterm exprColor (3.17-24: 100 10 10 255)
+Stack now 22 17 11 1 0
+Entering state 68
+Next token is token "end of line" (3.25-4.0: )
+Shifting token "end of line" (3.25-4.0: )
+Entering state 112
+Reducing stack by rule 9 (line 376):
+   $1 = nterm defineOrRedefine (3.1-6: 0)
+   $2 = token "variable" (3.8-9: $a)
+   $3 = token "Color" (3.11-15: Color)
+   $4 = nterm exprColor (3.17-24: 100 10 10 255)
+   $5 = token "end of line" (3.25-4.0: )
+-> $$ = nterm definition (3.1-4.0: [1] Define $a Color 100 10 10 255
+
+)
+Stack now 1 0
+Entering state 10
+Reducing stack by rule 3 (line 362):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-3.0: )
+   $2 = nterm definition (3.1-4.0: [1] Define $a Color 100 10 10 255
+
+)
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-4.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (4.1-5.0: )
+Shifting token "end of line" (4.1-5.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-4.0: )
+   $2 = token "end of line" (4.1-5.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-5.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "Define" (5.1-6: )
+Shifting token "Define" (5.1-6: )
+Entering state 6
+Reducing stack by rule 14 (line 388):
+   $1 = token "Define" (5.1-6: )
+-> $$ = nterm defineOrRedefine (5.1-6: 0)
+Stack now 1 0
+Entering state 11
+Reading a token: Next token is token "variable" (5.8-9: $b)
+Shifting token "variable" (5.8-9: $b)
+Entering state 17
+Reading a token: Next token is token "Color" (5.11-15: Color)
+Shifting token "Color" (5.11-15: Color)
+Entering state 22
+Reading a token: Next token is token "variable" (5.17-18: $n)
+Shifting token "variable" (5.17-18: $n)
+Entering state 65
+Reading a token: Next token is token "number" (5.20-21: 10)
+Reducing stack by rule 101 (line 586):
+   $1 = token "variable" (5.17-18: $n)
+-> $$ = nterm varNumber (5.17-18: 100)
+Stack now 22 17 11 1 0
+Entering state 64
+Reducing stack by rule 88 (line 547):
+   $1 = nterm varNumber (5.17-18: 100)
+-> $$ = nterm exprNumber (5.17-18: 100)
+Stack now 22 17 11 1 0
+Entering state 67
+Next token is token "number" (5.20-21: 10)
+Shifting token "number" (5.20-21: 10)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (5.20-21: 10)
+-> $$ = nterm exprNumber (5.20-21: 10)
+Stack now 67 22 17 11 1 0
+Entering state 111
+Reading a token: Next token is token "number" (5.23-24: 10)
+Shifting token "number" (5.23-24: 10)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (5.23-24: 10)
+-> $$ = nterm exprNumber (5.23-24: 10)
+Stack now 111 67 22 17 11 1 0
+Entering state 145
+Reading a token: Next token is token "number" (5.26-27: 10)
+Shifting token "number" (5.26-27: 10)
+Entering state 62
+Reducing stack by rule 89 (line 548):
+   $1 = token "number" (5.26-27: 10)
+-> $$ = nterm exprNumber (5.26-27: 10)
+Stack now 145 111 67 22 17 11 1 0
+Entering state 162
+Reducing stack by rule 94 (line 563):
+   $1 = nterm exprNumber (5.17-18: 100)
+   $2 = nterm exprNumber (5.20-21: 10)
+   $3 = nterm exprNumber (5.23-24: 10)
+   $4 = nterm exprNumber (5.26-27: 10)
+-> $$ = nterm exprColor (5.17-27: 100 10 10 10)
+Stack now 22 17 11 1 0
+Entering state 68
+Reading a token: Next token is token "end of line" (5.28-6.0: )
+Shifting token "end of line" (5.28-6.0: )
+Entering state 112
+Reducing stack by rule 9 (line 376):
+   $1 = nterm defineOrRedefine (5.1-6: 0)
+   $2 = token "variable" (5.8-9: $b)
+   $3 = token "Color" (5.11-15: Color)
+   $4 = nterm exprColor (5.17-27: 100 10 10 10)
+   $5 = token "end of line" (5.28-6.0: )
+-> $$ = nterm definition (5.1-6.0: [2] Define $b Color 100 10 10 10
+
+)
+Stack now 1 0
+Entering state 10
+Reducing stack by rule 3 (line 362):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-5.0: )
+   $2 = nterm definition (5.1-6.0: [2] Define $b Color 100 10 10 10
+
+)
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-6.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (6.1-7.0: )
+Shifting token "end of line" (6.1-7.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-6.0: )
+   $2 = token "end of line" (6.1-7.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-7.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "Define" (7.1-6: )
+Shifting token "Define" (7.1-6: )
+Entering state 6
+Reducing stack by rule 14 (line 388):
+   $1 = token "Define" (7.1-6: )
+-> $$ = nterm defineOrRedefine (7.1-6: 0)
+Stack now 1 0
+Entering state 11
+Reading a token: Next token is token "variable" (7.8-9: $c)
+Shifting token "variable" (7.8-9: $c)
+Entering state 17
+Reading a token: Next token is token "Color" (7.11-15: Color)
+Shifting token "Color" (7.11-15: Color)
+Entering state 22
+Reading a token: Next token is token "variable" (7.17-18: $a)
+Shifting token "variable" (7.17-18: $a)
+Entering state 65
+Reading a token: Next token is token "end of line" (7.19-8.0: )
+Reducing stack by rule 102 (line 596):
+   $1 = token "variable" (7.17-18: $a)
+-> $$ = nterm varColor (7.17-18: 100 10 10 255)
+Stack now 22 17 11 1 0
+Entering state 69
+Next token is token "end of line" (7.19-8.0: )
+Reducing stack by rule 91 (line 552):
+   $1 = nterm varColor (7.17-18: 100 10 10 255)
+-> $$ = nterm exprColor (7.17-18: 100 10 10 255)
+Stack now 22 17 11 1 0
+Entering state 68
+Next token is token "end of line" (7.19-8.0: )
+Shifting token "end of line" (7.19-8.0: )
+Entering state 112
+Reducing stack by rule 9 (line 376):
+   $1 = nterm defineOrRedefine (7.1-6: 0)
+   $2 = token "variable" (7.8-9: $c)
+   $3 = token "Color" (7.11-15: Color)
+   $4 = nterm exprColor (7.17-18: 100 10 10 255)
+   $5 = token "end of line" (7.19-8.0: )
+-> $$ = nterm definition (7.1-8.0: [3] Define $c Color 100 10 10 255
+
+)
+Stack now 1 0
+Entering state 10
+Reducing stack by rule 3 (line 362):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-7.0: )
+   $2 = nterm definition (7.1-8.0: [3] Define $c Color 100 10 10 255
+
+)
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-8.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (8.1-9.0: )
+Shifting token "end of line" (8.1-9.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-8.0: )
+   $2 = token "end of line" (8.1-9.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-9.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "Define" (9.1-6: )
+Shifting token "Define" (9.1-6: )
+Entering state 6
+Reducing stack by rule 14 (line 388):
+   $1 = token "Define" (9.1-6: )
+-> $$ = nterm defineOrRedefine (9.1-6: 0)
+Stack now 1 0
+Entering state 11
+Reading a token: Next token is token "variable" (9.8-9: $d)
+Shifting token "variable" (9.8-9: $d)
+Entering state 17
+Reading a token: Next token is token "Color" (9.11-15: Color)
+Shifting token "Color" (9.11-15: Color)
+Entering state 22
+Reading a token: Next token is token "variable" (9.17-18: $a)
+Shifting token "variable" (9.17-18: $a)
+Entering state 65
+Reading a token: Next token is token "number" (9.20-22: 100)
+Reducing stack by rule 101 (line 586):
+   $1 = token "variable" (9.17-18: $a)
+Error: popping token "Color" (9.11-15: Color)
+Stack now 17 11 1 0
+Error: popping token "variable" (9.8-9: $d)
+Stack now 11 1 0
+Error: popping nterm defineOrRedefine (9.1-6: 0)
+Stack now 1 0
+Shifting token error (9.1-22: )
+Entering state 3
+Next token is token "number" (9.20-22: 100)
+Error: discarding token "number" (9.20-22: 100)
+Error: popping token error (9.1-22: )
+Stack now 1 0
+Shifting token error (9.1-22: )
+Entering state 3
+Reading a token: Next token is token "end of line" (9.23-10.0: )
+Shifting token "end of line" (9.23-10.0: )
+Entering state 13
+Reducing stack by rule 6 (line 365):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-9.0: )
+   $2 = token error (9.1-22: )
+   $3 = token "end of line" (9.23-10.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-10.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (10.1-11.0: )
+Shifting token "end of line" (10.1-11.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-10.0: )
+   $2 = token "end of line" (10.1-11.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-11.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (11.1-12.0: )
+Shifting token "end of line" (11.1-12.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-11.0: )
+   $2 = token "end of line" (11.1-12.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-12.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (12.1-13.0: )
+Shifting token "end of line" (12.1-13.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-12.0: )
+   $2 = token "end of line" (12.1-13.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-13.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (13.1-14.0: )
+Shifting token "end of line" (13.1-14.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-13.0: )
+   $2 = token "end of line" (13.1-14.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-14.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (14.1-15.0: )
+Shifting token "end of line" (14.1-15.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-14.0: )
+   $2 = token "end of line" (14.1-15.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-15.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (15.1-16.0: )
+Shifting token "end of line" (15.1-16.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-15.0: )
+   $2 = token "end of line" (15.1-16.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-16.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (16.1-17.0: )
+Shifting token "end of line" (16.1-17.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-16.0: )
+   $2 = token "end of line" (16.1-17.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-17.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (17.1-18.0: )
+Shifting token "end of line" (17.1-18.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-17.0: )
+   $2 = token "end of line" (17.1-18.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-18.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (22.3-23.0: )
+Shifting token "end of line" (22.3-23.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-18.0: )
+   $2 = token "end of line" (22.3-23.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-23.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (23.1-24.0: )
+Shifting token "end of line" (23.1-24.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-23.0: )
+   $2 = token "end of line" (23.1-24.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-24.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (24.1-25.0: )
+Shifting token "end of line" (24.1-25.0: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-24.0: )
+   $2 = token "end of line" (24.1-25.0: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-25.0: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of line" (148.1-2: )
+Shifting token "end of line" (148.1-2: )
+Entering state 4
+Reducing stack by rule 5 (line 364):
+   $1 = nterm statements (tests/basicSyntax.ifpp:1.1-25.0: )
+   $2 = token "end of line" (148.1-2: )
+-> $$ = nterm statements (tests/basicSyntax.ifpp:1.1-148.2: )
+Stack now 0
+Entering state 1
+Reading a token: Next token is token "end of file" (148.1-2: )
+Shifting token "end of file" (148.1-2: )
+Entering state 2
+Cleanup: popping token "end of file" (148.1-2: )
+Cleanup: popping nterm statements (tests/basicSyntax.ifpp:1.1-148.2: )

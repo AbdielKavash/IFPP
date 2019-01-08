@@ -1,0 +1,59 @@
+###########
+# Basic incremental rule syntax.
+###
+
+Rule {
+	Class "Base Class"
+	ItemLevel 1 - 10
+	CustomAlertSound "1 - 10"
+	ItemLevel 20 - 30
+	CustomAlertSound "20 - 30"
+	ItemLevel 1 - 30
+	BaseType "Base Type"
+	CustomAlertSound "1 - 30"
+}
+
+Flush
+
+###########
+# Intersecting with an incremental rule.
+###
+
+Rule {
+	Class "Base Class"
+	ItemLevel 1 - 30
+	CustomAlertSound "All"
+}
+
+Rule AddOnly {
+	ItemLevel 1-10
+	SetTextColor 1 0 0
+	
+	ItemLevel 11 - 20
+	SetTextColor 11 0 0
+	
+	ItemLevel 21 - 30
+	SetTextColor 21 0 0
+}
+
+Flush
+
+###########
+# Incremental + lists
+###
+
+Rule {
+	Class "Currency"
+	SetTextColor 255 255 0
+}
+
+Rule AddOnly {
+	BaseType "Red"
+	SetBackgroundColor 255 0 0
+	
+	BaseType "Green"
+	SetBackgroundColor 0 255 0
+	
+	BaseType "Blue"
+	SetBackgroundColor 0 0 255
+}

@@ -1,0 +1,64 @@
+###########
+# Overriding name lists
+# Problem: This generates useless rules that do not match anything,
+# if the classes are actually disjoint.
+# Solution: we assume that incomparable NameLists are actually disjoint.
+###
+
+Rule {
+	Class "Background"
+	SetBackgroundColor 255 0 0
+}
+
+Rule {
+	Class "Text"
+	SetTextColor 0 255 0
+}
+
+Rule {
+	Class "Border"
+	SetBorderColor 0 0 255
+}
+
+Flush
+
+###########
+# However, this should detect that the rules do intersect!
+# (Ideally, also get their difference.)
+###
+
+Rule {
+	Class "Background only" "Background and Text"
+	SetBackgroundColor 255 0 0
+}
+
+Rule {
+	Class "Text only" "Background and Text"
+	SetTextColor 0 255 0
+}
+
+Flush
+
+###########
+# This is just a small example, will have to see if this breaks in practice!
+# A broader rule that completely overrides a narrower rule.
+# Not sure if anyone would actually do this? But it could fall out of some intersections.
+#
+# Important thing is that it gets the intersection right and doesn't produce two conditions.
+###
+
+Rule {
+	Class "Append Override"
+	CustomAlertSound "Append Override"
+}
+
+Rule {
+	Class "Override"
+	Override CustomAlertSound "Override"
+}
+
+Rule {
+	Class "Append"
+	Append CustomAlertSound "Append"
+	#Append SetTextColor 255 0 0 
+}

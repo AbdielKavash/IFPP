@@ -1,0 +1,697 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>IFPP - Item Filter Preprocessor, version 1.0.0</title>
+
+<meta name="description" content="IFPP - Item Filter Preprocessor, version 1.0.0">
+<meta name="keywords" content="IFPP - Item Filter Preprocessor, version 1.0.0">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="#Top" rel="start" title="Top">
+<link href="#Index" rel="index" title="Index">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="dir.html#Top" rel="up" title="(dir)">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+body { padding: 5%; }
+pre.example { border:1px solid gray; background-color:#F0F0F0; padding:1em 5em 1em 1em; display:inline-block;}
+code { padding:0 0.3em; background-color:#DFDFDF; }
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">IFPP - Item Filter Preprocessor, version 1.0.0</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<a name="SEC_Contents"></a>
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="no-bullet">
+  <li><a name="toc-Introduction-1" href="#Introduction">1 Introduction</a></li>
+  <li><a name="toc-Using-IFPP-1" href="#Using-IFPP">2 Using IFPP</a></li>
+  <li><a name="toc-IFPP-Syntax-1" href="#IFPP-Syntax">3 IFPP Syntax</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Basics-1" href="#Basics">3.1 Basics</a></li>
+    <li><a name="toc-Comments-1" href="#Comments">3.2 Comments</a></li>
+    <li><a name="toc-Rules-1" href="#Rules">3.3 Rules</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Basic-Syntax-1" href="#Basic-Syntax">3.3.1 Basic Syntax</a></li>
+      <li><a name="toc-Conditions-1" href="#Conditions">3.3.2 Conditions</a></li>
+      <li><a name="toc-Actions-1" href="#Actions">3.3.3 Actions</a></li>
+      <li><a name="toc-Modifiers-1" href="#Modifiers">3.3.4 Modifiers</a></li>
+      <li><a name="toc-Incremental-Rules-1" href="#Incremental-Rules">3.3.5 Incremental Rules</a></li>
+    </ul></li>
+    <li><a name="toc-Variables-1" href="#Variables">3.4 Variables</a></li>
+    <li><a name="toc-Special-Instructions-1" href="#Special-Instructions">3.5 Special Instructions</a></li>
+  </ul></li>
+  <li><a name="toc-A-Complete-Example-1" href="#A-Complete-Example">4 A Complete Example</a></li>
+  <li><a name="toc-IFPP-Errors-1" href="#IFPP-Errors">5 IFPP Errors</a></li>
+  <li><a name="toc-Performance-Considerations-1" href="#Performance-Considerations">6 Performance Considerations</a></li>
+  <li><a name="toc-Compatibility-with-Native-Filters-1" href="#Compatibility-with-Native-Filters">7 Compatibility with Native Filters</a></li>
+  <li><a name="toc-Compatibility-with-Different-Versions-1" href="#Compatibility-with-Different-Versions">8 Compatibility with Different Versions</a></li>
+  <li><a name="toc-Version-History-1" href="#Version-History">9 Version History</a></li>
+  <li><a name="toc-Contact-1" href="#Contact">10 Contact</a></li>
+  <li><a name="toc-Index-1" href="#Index">Index</a></li>
+</ul>
+</div>
+
+
+<a name="Top"></a>
+<div class="header">
+<p>
+Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Up: <a href="dir.html#Top" accesskey="u" rel="up">(dir)</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Manual-for-IFPP-_002d-Item-Filter-Preprocessor"></a>
+<h1 class="top">Manual for IFPP - Item Filter Preprocessor</h1>
+
+<p>This is the manual for IFPP - Item Filter Preprocessor (version 1.0.0) for Path of Exile.
+This version of IFPP is designed to be compatible with Path of Exile version 3.4.x, although will probably work with later versions of PoE as well.
+</p>
+<p>Created by Abdiel Kavash, 2018.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">List of sections:
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Introduction" accesskey="1">Introduction</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">What is IFPP.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+What you need to know to make an item filter using IFPP:
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Using-IFPP" accesskey="2">Using IFPP</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to use IFPP.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#IFPP-Syntax" accesskey="3">IFPP Syntax</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Details of the IFPP filter syntax.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#A-Complete-Example" accesskey="4">A Complete Example</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">A complete example of writing an IFPP filter, line by line.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#IFPP-Errors" accesskey="5">IFPP Errors</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to read the error log to figure out what went wrong.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Performance-Considerations" accesskey="6">Performance Considerations</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">What to keep in mind to make your filter work faster.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+Boring programmer stuff:
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Compatibility-with-Native-Filters" accesskey="7">Compatibility with Native Filters</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Adding IFPP features to existing native filters.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Compatibility-with-Different-Versions" accesskey="8">Compatibility with Different Versions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Compatibility considerations for newer version of both IFPP and PoE.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Version-History" accesskey="9">Version History</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">History of IFPP releases and plans for upcoming features.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Contact">Contact</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">How to get in touch with me to give feedback or report bugs.
+</td></tr>
+<tr><th colspan="3" align="left" valign="top"><pre class="menu-comment">
+
+</pre></th></tr><tr><td align="left" valign="top">&bull; <a href="#Index">Index</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Index of contents.
+</td></tr>
+</table>
+
+
+
+<hr>
+<a name="Introduction"></a>
+<div class="header">
+<p>
+Next: <a href="#Using-IFPP" accesskey="n" rel="next">Using IFPP</a>, Previous: <a href="#Top" accesskey="p" rel="prev">Top</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Introduction-1"></a>
+<h2 class="chapter">1 Introduction</h2>
+
+<p>IFPP is a preprocessor for <a href="https://pathofexile.gamepedia.com/Item_filter">item filters</a> for <a href="https://www.pathofexile.com">Path of Exile</a>, an action RPG developed by <a href="http://www.grindinggear.com">Grinding Gear Games</a>. This program allows item filter creators to use a much more powerful syntax than that of native item filters provided by GGG. Instead of comparing items with one rule at a time, and stopping immediately when a matching rule is found; an IFPP filter continues looking for more rules that can add further styles to the display of dropped items.
+</p>
+<p>For example, let&rsquo;s say you want to display normal items as white, magic items as blue, rare yellow, and unique orange. But you also want to add a white border around all items with linked red, green, and blue sockets for the Chromatic Orb vendor recipe. Using the native item filter syntax provided by GGG, you need a separate rule for each rarity both with and without the RGB socket group:
+</p>
+<div class="example">
+<pre class="example">Show
+    Rarity Normal
+    SocketGroup RGB
+    SetTextColor 200 200 200
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Normal
+    SetTextColor 200 200 200
+
+Show
+    Rarity Magic
+    SocketGroup RGB
+    SetTextColor 136 136 255
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Magic
+    SetTextColor 136 136 255
+
+Show
+    Rarity Rare
+    SocketGroup RGB
+    SetTextColor 255 255 119
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Rare
+    SetTextColor 255 255 119
+
+Show
+    Rarity Unique
+    SocketGroup RGB
+    SetTextColor 175 96 37
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Unique
+    SetTextColor 175 96 37
+</pre></div>
+
+<p>If you want to add more and more independent conditions, you need to add a new rule for every possible combination. This results in large amounts of reused code, poor readability, and filters which are difficult to maintain and modify. For example, if you wanted to change the color of the border for RGB items, you would have to change it in all of the rules.
+</p>
+<p>With IFPP, you can write the same filter like this:
+</p>
+<div class="example">
+<pre class="example">RULE
+    Rarity Normal
+    SetTextColor 200 200 200
+
+RULE
+    Rarity Magic
+    SetTextColor 136 136 255
+
+RULE
+    Rarity Rare
+    SetTextColor 255 255 119
+
+RULE
+    Rarity Unique
+    SetTextColor 175 96 37
+
+RULE
+    SocketGroup RGB
+    APPEND SetBorderColor 255 255 255
+</pre></div>
+
+<p>The <code>APPEND</code> keyword in the last rule tells IFPP to add the border color to all matching items, together with any other styles that have been already applied to them above.
+</p>
+<p>In addition to this powerful functionality, IFPP provides several quality of life improvements over GGG native filters, including reusing values and code using variables, incremental rules, &ldquo;syntactic sugar&rdquo; like hexadecimal values for colors, and more.
+</p>
+<p>This manual assumes the reader has a basic knowledge of writing item filters for PoE. For more information on item filters, see the <a href="https://pathofexile.gamepedia.com/Item_filter_guide">item filter guide</a> at the unofficial PoE wiki.
+</p>
+<p>Version 1.0.0 of IFPP is designed to be fully compatible with Path of Exile version 3.4.x, although the created filters will most likely function correctly in more recent versions of PoE as well. See <a href="#Compatibility-with-Different-Versions">Compatibility with Different Versions</a> for details.
+</p>
+
+
+
+<hr>
+<a name="Using-IFPP"></a>
+<div class="header">
+<p>
+Next: <a href="#IFPP-Syntax" accesskey="n" rel="next">IFPP Syntax</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="index-Using-IFPP"></a>
+<a name="Using-IFPP-1"></a>
+<h2 class="chapter">2 Using IFPP</h2>
+
+<p>IFPP works as a <em>preprocessor</em>. The program takes a filter using the enhanced IFPP syntax as an input, and creates from it an item filter executing the same rules using only the native GGG syntax that can be read by Path of Exile. From here on, we will always refer to filters with the added features of IFPP as &ldquo;<em>IFPP filters</em>&rdquo;, and to filters using only the standard syntax provided by GGG as &ldquo;<em>native filters</em>&rdquo;.
+</p>
+<p>The workflow of using IFPP looks like this:
+</p>
+<ol>
+<li> Write your IFPP filter using the enhanced syntax options described in this manual.
+</li><li> Run the IFPP preprocessor on this filter to generate a native filter.
+</li><li> Copy the created native filter into the usual location for item filters (<samp>\My Documents\My Games\Path of Exile\</samp>).
+</li><li> Load your filter in PoE and play!
+</li></ol>
+
+<p>Currently, IFPP is only available as a command line utility (GUI version to come soon). The syntax is the following:
+</p>
+<div class="example">
+<pre class="example">ifpp &lt;<em>input file</em>&gt; [<em>output file</em>] [<em>log file</em>]
+</pre></div>
+
+<p>The input file is the IFPP filter you have created, and has by convention the extension <code>.ifpp</code>. The output file is the native filter that will be created by IFPP. Use the extension <code>.filter</code> for it to be usable by Path of Exile. The optional log file lists possible problems with your IFPP filter.
+</p>
+<p>If you do not specify either the output or the log file, the same file name as the input (with its extension stripped) will be used for both, with the extensions <code>.filter</code> and <code>.log</code> respectively. If you use &quot;<code>-</code>&quot; in place of either file name, it will be written to the console instead.
+</p>
+
+
+<hr>
+<a name="IFPP-Syntax"></a>
+<div class="header">
+<p>
+Next: <a href="#A-Complete-Example" accesskey="n" rel="next">A Complete Example</a>, Previous: <a href="#Using-IFPP" accesskey="p" rel="prev">Using IFPP</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="index-IFPP-syntax"></a>
+<a name="IFPP-Syntax-1"></a>
+<h2 class="chapter">3 IFPP Syntax</h2>
+
+<p>This section describes the syntax of IFPP filter files.
+</p>
+<p>Contents:
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Basics" accesskey="1">Basics</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Basics and formatting details.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Comments" accesskey="2">Comments</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Commenting your filter.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Rules" accesskey="3">Rules</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Specifying rules for matching items and applying styles to them.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Variables" accesskey="4">Variables</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Defining and using variables.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Special-Instructions" accesskey="5">Special Instructions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Special instructions to control an IFPP filter.
+</td></tr>
+</table>
+
+<hr>
+<a name="Basics"></a>
+<div class="header">
+<p>
+Next: <a href="#Comments" accesskey="n" rel="next">Comments</a>, Up: <a href="#IFPP-Syntax" accesskey="u" rel="up">IFPP Syntax</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Basics-1"></a>
+<h3 class="section">3.1 Basics</h3>
+
+<p>The IFPP filter syntax largely resembles the syntax of native PoE filters. It also consists of a series of rules, with conditions describing the items to be matched and actions applying visual styles to them. In fact, every native filter is also a valid IFPP filter, and will produce the same filter (up to formatting differences) as an output if ran through IFPP. However, in addition to this, IFPP also offers many new syntax features extending the native filters.
+</p>
+<p>IFPP filters are always case-insensitive. Writing <code>RULE APPEND</code> is the same as <code>Rule Append</code> or <code>rule append</code> and so on. In this manual, we will use <code>ALL CAPS</code> for IFPP-specific syntax, in order to clearly distinguish it from keywords used by native filters. However, you should not feel restricted by this: if you prefer writing your keywords with a proper capitalization, you are free to do so (and in fact the author writes his filters in this way).
+</p>
+<p>Horizontal whitespace (spaces and tabs) never matters in IFPP filters. You are free to indent your filters in whatever way you wish. However, vertical whitespace (new lines) does: every IFPP instruction must be written on a separate line, and blank lines have a special meaning in some cases. A line containing only whitespace is considered blank; but a line containing a <a href="#Comments">comment</a> is not.
+</p>
+<p>An IFPP filter consists of three different types of commands: <a href="#Rules">rules</a>, <a href="#Variables">variable definitions</a>, and <a href="#Special-Instructions">special instructions</a>.
+Rules form the core of an item filter. Similarly to native filters, a rule defines conditions on items to match, and actions to perform for all matched items.
+Variables can store values (such as numbers or item names) which can then be referenced later in the filter.
+Special instructions affect the behavior of IFPP in various ways.
+</p>
+<hr>
+<a name="Comments"></a>
+<div class="header">
+<p>
+Next: <a href="#Rules" accesskey="n" rel="next">Rules</a>, Previous: <a href="#Basics" accesskey="p" rel="prev">Basics</a>, Up: <a href="#IFPP-Syntax" accesskey="u" rel="up">IFPP Syntax</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="index-Comments"></a>
+<a name="Comments-1"></a>
+<h3 class="section">3.2 Comments</h3>
+
+<p>IFPP offers three different styles of comments:
+</p>
+<div class="example">
+<pre class="example"># Native filter style single line comments.
+</pre></div>
+
+<div class="example">
+<pre class="example">// C-style single line comments.
+</pre></div>
+
+<div class="example">
+<pre class="example">/* C++ - style
+multi-line
+comments. */
+</pre></div>
+
+<p>Comments are in all cases ignored and have no impact on (and will not be output to) the final native filter.
+</p>
+<hr>
+<a name="Rules"></a>
+<div class="header">
+<p>
+Next: <a href="#Variables" accesskey="n" rel="next">Variables</a>, Previous: <a href="#Comments" accesskey="p" rel="prev">Comments</a>, Up: <a href="#IFPP-Syntax" accesskey="u" rel="up">IFPP Syntax</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="index-Rules"></a>
+<a name="index-RULE"></a>
+<a name="Rules-1"></a>
+<h3 class="section">3.3 Rules</h3>
+
+<p>Rule sections make up the core part of an IFPP filter. Just like in a native filter, a rule consists of several <a href="#Conditions">conditions</a>, which specify items that should be matched by this rule; and <a href="#Actions">actions</a> which specify what to do with the matching items - usually apply some visual style. Unlike in native filters, however, processing an item does not end with the first matching rule. Subsequent rules can change and override styles that were applied to an item by previous rules. The various ways in which rules affect each other are specified by <a href="#Modifiers">modifiers</a>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="#Basic-Syntax" accesskey="1">Basic Syntax</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Basic syntax of writing rules.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Conditions" accesskey="2">Conditions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Specifying conditions on items to match.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Actions" accesskey="3">Actions</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Specifying actions to perform on matched items.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Modifiers" accesskey="4">Modifiers</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Specifying ways in which different rules matching the same rules interact.
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="#Incremental-Rules" accesskey="5">Incremental Rules</a>:</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">Applying different actions to the same item under different conditions.
+</td></tr>
+</table>
+
+
+
+<hr>
+<a name="Basic-Syntax"></a>
+<div class="header">
+<p>
+Next: <a href="#Conditions" accesskey="n" rel="next">Conditions</a>, Up: <a href="#Rules" accesskey="u" rel="up">Rules</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Basic-Syntax-1"></a>
+<h4 class="subsection">3.3.1 Basic Syntax</h4>
+
+<p>The basic syntax of writing a rule is the following:
+</p>
+<div class="example">
+<pre class="example">RULE [<em>modifiers</em>] {
+    [<em>conditions</em>]
+    [<em>actions</em>]
+}
+</pre></div>
+
+<p>The opening brace can be on the same line as the <code>RULE</code> header, or on the line immediately following it. You can omit the braces, in this case the rule contains all commands until the next blank line. (A line containing only whitespace is considered blank, but a line containing a comment is not.) If the rule has no modifiers, the entire header can also be omitted. The modifier <code>APPEND</code> is assumed in this case. See <a href="#Modifiers">Modifiers</a> for details.
+</p>
+<p>This means that all of the following are valid rules which produce the same output:
+</p>
+<div class="example">
+<pre class="example">RULE APPEND {
+    BaseType &quot;Exalted Orb&quot;
+    PlayAlertSound 8 200
+}
+</pre></div>
+
+<div class="example">
+<pre class="example">RULE APPEND {
+    BaseType &quot;Exalted Orb&quot;
+
+    PlayAlertSound 8 200
+}
+</pre></div>
+
+<div class="example">
+<pre class="example">RULE APPEND
+{
+    BaseType &quot;Exalted Orb&quot;
+    PlayAlertSound 8 200
+}
+</pre></div>
+
+<div class="example">
+<pre class="example">RULE APPEND
+    BaseType &quot;Exalted Orb&quot;
+    PlayAlertSound 8 200
+</pre></div>
+
+<div class="example">
+<pre class="example">RULE APPEND
+    BaseType &quot;Exalted Orb&quot;
+    # Money!
+    PlayAlertSound 8 200
+</pre></div>
+
+<div class="example">
+<pre class="example">BaseType &quot;Exalted Orb&quot;
+PlayAlertSound 8 200
+</pre></div>
+
+<p>Again, keep in mind that if you do not use braces, the rule only takes commands until the next blank line! The following are <strong>two separate rules</strong>, which is probably not what you want:
+</p>
+<div class="example">
+<pre class="example">RULE
+    BaseType &quot;Exalted Orb&quot;
+
+    PlayAlertSound 8 200
+</pre></div>
+
+<p>A rule can be defined with no conditions; in this case the rule applies to <em>all</em> items. You can use this, for example, to hide all items not matched by the rest of your filter. A rule with no actions is also valid, although such a rule will usually not do anything.
+</p>
+<p>Finally, instead of the <code>RULE</code> keyword, a rule can also begin with either <code>SHOW</code> or <code>HIDE</code>. The keyword <code>SHOW</code> is equivalent to <code>RULE APPEND FINAL</code>, and <code>HIDE</code> is equivalent to <code>RULE APPEND FINAL</code> with an additional action <code>HIDDEN</code> added at the end. However, this is purely for compatibility with native filters. Some special features of IFPP might not work in the expected way inside of rules declared with <code>SHOW</code> or <code>HIDE</code>. Therefore, if you are writing an IFPP filter from scratch, <strong>do not use the keywords <code>SHOW</code> or <code>HIDE</code> like this</strong>. Only use <code>RULE</code> to declare a rule.
+</p>
+
+
+<hr>
+<a name="Conditions"></a>
+<div class="header">
+<p>
+Next: <a href="#Actions" accesskey="n" rel="next">Actions</a>, Previous: <a href="#Basic-Syntax" accesskey="p" rel="prev">Basic Syntax</a>, Up: <a href="#Rules" accesskey="u" rel="up">Rules</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="index-Conditions"></a>
+<a name="Conditions-1"></a>
+<h4 class="subsection">3.3.2 Conditions</h4>
+
+<p>Just like in native filters, the conditions of a rule specify which items the rule should be applied to. Version 1.0.0 of IFPP supports all conditions that can be used in native filters as of PoE version 3.4.x. Namely, here is the full list of supported conditions:
+</p>
+<div class="example">
+<pre class="example">ItemLevel
+DropLevel
+Quality
+Sockets
+LinkedSockets
+Height
+Width
+StackSize
+GemLevel
+MapTier
+
+Class
+BaseType
+HasExplicitMod
+
+Identified
+Corrupted
+ElderItem
+ShaperItem
+ShapedMap
+
+Rarity
+SocketGroup
+</pre></div>
+
+<p>The syntax of all conditions is the same as in native filters. Notably, for conditions that take a list of strings (<code>Class</code>, <code>BaseType</code>, and <code>HasExplicitMod</code>), every string is matched separately. So <code>Class One Hand</code> will match any item with either &ldquo;One&rdquo; or &ldquo;Hand&rdquo; in its class. To match items with the class &ldquo;One Hand&rdquo;, use quotes: <code>Class &quot;One Hand&quot;</code>, just like you would do in a native filter. Also as in native filters, a rule with multiple conditions will only match items which satisfy all of the conditions.
+</p>
+<p>Conditions which make a numerical comparison (in the first group listed above) will perform a bounds check on the value given. A value that is out of the possible range for a condition, such as <code>Sockets &gt; 8</code>, results in a warning.
+</p>
+
+
+<hr>
+<a name="Actions"></a>
+<div class="header">
+<p>
+Next: <a href="#Modifiers" accesskey="n" rel="next">Modifiers</a>, Previous: <a href="#Conditions" accesskey="p" rel="prev">Conditions</a>, Up: <a href="#Rules" accesskey="u" rel="up">Rules</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Actions-1"></a>
+<h4 class="subsection">3.3.3 Actions</h4>
+
+<p>The actions of a rule specify what to do with the items that match the rule. Most of the time, this changes the way the label of the item is displayed. All the actions used by native filters as of PoE version 3.4.x are supported, namely:
+</p>
+<div class="example">
+<pre class="example">SetTextColor
+SetBackgroundColor
+SetBorderColor
+
+SetFontSize
+
+PlayAlertSound
+PlayAlertSoundPositional
+
+CustomAlertSound
+MinimapIcon
+PlayEffect
+DisableDropSound
+</pre></div>
+
+<p>The syntax of all actions is the same as in native filters. Actions which take a numerical argument perform a bounds check. If a value is out of the possible range for an action, IFPP gives a warning and adjusts the value to fit within the allowed bounds.
+</p>
+<p>In addition to these, IFPP provides two new actions:
+</p>
+<div class="example">
+<pre class="example">HIDDEN [<em>true</em>/<em>false</em>]
+</pre></div>
+
+<p>When set to <code>true</code>, this action behaves just like a <code>Hide</code> block in a native filter: it makes the item not display a label at all. However, all other actions in the rule are still applied to the item. Sounds, minimap icons, and light beams still work; and the label will be displayed with the proper style when the &ldquo;Highlight Items&rdquo; key is held. The value of the <code>HIDDEN</code> action can also be overridden by later rules, just like any other action!
+</p>
+<p>Note that the spelling of the action is <code>HIDDEN</code>, not <code>Hide</code> as in native filters. There are unfortunate technical reasons that prevent IFPP from using the same keyword.
+</p>
+<div class="example">
+<pre class="example">USESTYLE [<em>variable</em>]
+</pre></div>
+
+<p>This action adds all actions defined in the given <a href="#Variables">variable</a> to the rule. The variable must be of the type <code>STYLE</code>, otherwise IFPP gives an error and this action is ignored.
+</p>
+<hr>
+<a name="Modifiers"></a>
+<div class="header">
+<p>
+Next: <a href="#Incremental-Rules" accesskey="n" rel="next">Incremental Rules</a>, Previous: <a href="#Actions" accesskey="p" rel="prev">Actions</a>, Up: <a href="#Rules" accesskey="u" rel="up">Rules</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Modifiers-1"></a>
+<h4 class="subsection">3.3.4 Modifiers</h4>
+
+<hr>
+<a name="Incremental-Rules"></a>
+<div class="header">
+<p>
+Previous: <a href="#Modifiers" accesskey="p" rel="prev">Modifiers</a>, Up: <a href="#Rules" accesskey="u" rel="up">Rules</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Incremental-Rules-1"></a>
+<h4 class="subsection">3.3.5 Incremental Rules</h4>
+
+
+<hr>
+<a name="Variables"></a>
+<div class="header">
+<p>
+Next: <a href="#Special-Instructions" accesskey="n" rel="next">Special Instructions</a>, Previous: <a href="#Rules" accesskey="p" rel="prev">Rules</a>, Up: <a href="#IFPP-Syntax" accesskey="u" rel="up">IFPP Syntax</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Variables-1"></a>
+<h3 class="section">3.4 Variables</h3>
+
+<hr>
+<a name="Special-Instructions"></a>
+<div class="header">
+<p>
+Previous: <a href="#Variables" accesskey="p" rel="prev">Variables</a>, Up: <a href="#IFPP-Syntax" accesskey="u" rel="up">IFPP Syntax</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Special-Instructions-1"></a>
+<h3 class="section">3.5 Special Instructions</h3>
+
+<hr>
+<a name="A-Complete-Example"></a>
+<div class="header">
+<p>
+Next: <a href="#IFPP-Errors" accesskey="n" rel="next">IFPP Errors</a>, Previous: <a href="#IFPP-Syntax" accesskey="p" rel="prev">IFPP Syntax</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="A-Complete-Example-1"></a>
+<h2 class="chapter">4 A Complete Example</h2>
+
+<hr>
+<a name="IFPP-Errors"></a>
+<div class="header">
+<p>
+Next: <a href="#Performance-Considerations" accesskey="n" rel="next">Performance Considerations</a>, Previous: <a href="#A-Complete-Example" accesskey="p" rel="prev">A Complete Example</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="IFPP-Errors-1"></a>
+<h2 class="chapter">5 IFPP Errors</h2>
+
+<hr>
+<a name="Performance-Considerations"></a>
+<div class="header">
+<p>
+Next: <a href="#Compatibility-with-Native-Filters" accesskey="n" rel="next">Compatibility with Native Filters</a>, Previous: <a href="#IFPP-Errors" accesskey="p" rel="prev">IFPP Errors</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Performance-Considerations-1"></a>
+<h2 class="chapter">6 Performance Considerations</h2>
+
+<hr>
+<a name="Compatibility-with-Native-Filters"></a>
+<div class="header">
+<p>
+Next: <a href="#Compatibility-with-Different-Versions" accesskey="n" rel="next">Compatibility with Different Versions</a>, Previous: <a href="#Performance-Considerations" accesskey="p" rel="prev">Performance Considerations</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Compatibility-with-Native-Filters-1"></a>
+<h2 class="chapter">7 Compatibility with Native Filters</h2>
+
+<hr>
+<a name="Compatibility-with-Different-Versions"></a>
+<div class="header">
+<p>
+Next: <a href="#Version-History" accesskey="n" rel="next">Version History</a>, Previous: <a href="#Compatibility-with-Native-Filters" accesskey="p" rel="prev">Compatibility with Native Filters</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Compatibility-with-Different-Versions-1"></a>
+<h2 class="chapter">8 Compatibility with Different Versions</h2>
+
+<hr>
+<a name="Version-History"></a>
+<div class="header">
+<p>
+Next: <a href="#Contact" accesskey="n" rel="next">Contact</a>, Previous: <a href="#Compatibility-with-Different-Versions" accesskey="p" rel="prev">Compatibility with Different Versions</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Version-History-1"></a>
+<h2 class="chapter">9 Version History</h2>
+
+<hr>
+<a name="Contact"></a>
+<div class="header">
+<p>
+Next: <a href="#Index" accesskey="n" rel="next">Index</a>, Previous: <a href="#Version-History" accesskey="p" rel="prev">Version History</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Contact-1"></a>
+<h2 class="chapter">10 Contact</h2>
+
+<hr>
+<a name="Index"></a>
+<div class="header">
+<p>
+Previous: <a href="#Contact" accesskey="p" rel="prev">Contact</a>, Up: <a href="#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<a name="Index-1"></a>
+<h2 class="unnumbered">Index</h2>
+
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Index_cp_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-U"><b>U</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="index-cp" border="0">
+<tr><td></td><th align="left">Index Entry</th><td>&nbsp;</td><th align="left"> Section</th></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Index_cp_letter-C">C</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Comments">Comments</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Comments">Comments</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Conditions">Conditions</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Conditions">Conditions</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Index_cp_letter-I">I</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-IFPP-syntax">IFPP syntax</a>:</td><td>&nbsp;</td><td valign="top"><a href="#IFPP-Syntax">IFPP Syntax</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Index_cp_letter-R">R</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-RULE"><code>RULE</code></a>:</td><td>&nbsp;</td><td valign="top"><a href="#Rules">Rules</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Rules">Rules</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Rules">Rules</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+<tr><th><a name="Index_cp_letter-U">U</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-Using-IFPP">Using IFPP</a>:</td><td>&nbsp;</td><td valign="top"><a href="#Using-IFPP">Using IFPP</a></td></tr>
+<tr><td colspan="4"> <hr></td></tr>
+</table>
+<table><tr><th valign="top">Jump to: &nbsp; </th><td><a class="summary-letter" href="#Index_cp_letter-C"><b>C</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-I"><b>I</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+<a class="summary-letter" href="#Index_cp_letter-U"><b>U</b></a>
+ &nbsp; 
+</td></tr></table>
+
+<hr>
+
+
+
+</body>
+</html>

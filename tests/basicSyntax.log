@@ -1,0 +1,12 @@
+Item Filter PreProcessor, version 2.0.0
+Designed for compatibility with Path of Exile version 3.4, but should work with any later releases.
+Input file "tests/basicSyntax.ifpp", output file "tests/basicSyntax.filter", log file "tests/basicSyntax.log".
+
+Parser initialized.
+Parsing file "tests/basicSyntax.ifpp"...
+Error: Line 9.17-18: Wrong type, expected Number
+Parsing finished.
+	4 definitions
+	0 instructions
+	0 rules
+

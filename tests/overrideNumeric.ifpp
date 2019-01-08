@@ -1,0 +1,15 @@
+###########
+# Overriding numerical conditions
+# Problem: This should understand that the intersection is more restrictive than the first rule,
+# and not create an extra rule for the second.
+###
+
+Rule {
+	ItemLevel < 50
+	CustomAlertSound "Less than 50"
+}
+
+Rule {
+	ItemLevel < 30
+	Override CustomAlertSound "Less than 30"
+}

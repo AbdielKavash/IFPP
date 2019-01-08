@@ -1,0 +1,29 @@
+[4] Rule {
+	[0] Class "Base Class"
+	[1] CustomAlertSound "1 - 10"
+	[2] CustomAlertSound "20 - 30"
+	[3] CustomAlertSound "1 - 30"
+}
+
+[8] Rule {
+	[6] Class "Base Class"
+	[7] CustomAlertSound "All"
+}
+
+[13] Rule {
+	[10] SetTextColor 1 0 0 255
+	[11] SetTextColor 11 0 0 255
+	[12] SetTextColor 21 0 0 255
+}
+
+[17] Rule {
+	[15] Class "Currency"
+	[16] SetTextColor 255 255 0 255
+}
+
+[23] Rule {
+	[19] BaseType "Red"
+	[20] SetBackgroundColor 255 0 0 255
+	[21] SetBackgroundColor 0 255 0 255
+	[22] SetBackgroundColor 0 0 255 255
+}

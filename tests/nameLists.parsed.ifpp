@@ -1,0 +1,39 @@
+[2] Rule {
+	[0] Class "Background"
+	[1] SetBackgroundColor 255 0 0 255
+}
+
+[6] Rule {
+	[4] Class "Text"
+	[5] SetTextColor 0 255 0 255
+}
+
+[10] Rule {
+	[8] Class "Border"
+	[9] SetBorderColor 0 0 255 255
+}
+
+[14] Rule {
+	[12] Class "Background only" "Background and Text"
+	[13] SetBackgroundColor 255 0 0 255
+}
+
+[18] Rule {
+	[16] Class "Text only" "Background and Text"
+	[17] SetTextColor 0 255 0 255
+}
+
+[22] Rule {
+	[20] Class "Append Override"
+	[21] CustomAlertSound "Append Override"
+}
+
+[26] Rule {
+	[24] Class "Override"
+	[25] Override CustomAlertSound "Override"
+}
+
+[30] Rule {
+	[28] Class "Append"
+	[29] CustomAlertSound "Append"
+}

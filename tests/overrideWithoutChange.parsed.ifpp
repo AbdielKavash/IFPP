@@ -1,0 +1,9 @@
+[2] Rule {
+	[0] Class "Class"
+	[1] CustomAlertSound "Class"
+}
+
+[6] Rule {
+	[4] BaseType "BaseType"
+	[5] CustomAlertSound "BaseType"
+}

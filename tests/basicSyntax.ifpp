@@ -1,0 +1,277 @@
+# Comment
+
+# Comment
+# Comment
+
+// Comment
+
+// Comment
+// Comment
+
+/*
+
+Comment
+
+*//*
+Comment
+*/
+
+Version 2.0.0
+
+Define $n Number 42
+Redefine $n Number 1
+
+Define $c Color 255 0 0
+Redefine $c Color 255 0 0 0
+Redefine $c Color $n 0 0
+Redefine $c Color $n 0 0 $n
+Define $c2 Color $c : 100
+
+Redefine $c Color xabc
+Redefine $c Color xabcd
+Redefine $c Color x0a0b0c
+Redefine $c Color x0a0b0c0d
+
+Define $f File "C:/File.txt"
+Redefine $f File "C:/File2.txt"
+
+Define $l List item "item2" "item three" item4 item5
+Define $l2 List $l "added thing"
+
+Define $s Style {
+	SetTextColor $c
+}
+
+Rule {
+
+
+}
+
+Redefine $n Number 10
+Rule {
+	ItemLevel 50
+	ItemLevel < 50
+	ItemLevel <= 50
+	ItemLevel = 50
+	ItemLevel >= 50
+	ItemLevel > 50
+	ItemLevel 10 .. 20
+
+	ItemLevel < $n
+	ItemLevel <= $n
+	ItemLevel = $n
+	ItemLevel >= $n
+	ItemLevel > $n
+	ItemLevel $n .. 20
+	ItemLevel 10 .. $n
+	ItemLevel $n .. $n
+}
+
+Rule {
+	Rarity Normal
+	Rarity Magic
+	Rarity Rare
+	Rarity Unique
+	Rarity < Magic
+	Rarity <= Magic
+	Rarity = Magic
+	Rarity >= Magic
+	Rarity > Magic
+	Rarity Magic .. Rare
+}
+
+Rule {
+	ItemLevel 1
+	DropLevel 1
+	Quality 1
+	Sockets 1
+	LinkedSockets 1
+	Height 1
+	Width 1
+	StackSize 1
+	GemLevel 1
+	MapTier 1
+}
+
+Rule {
+	Class text text2 "text three"
+	BaseType text text2 "text three"
+	HasExplicitMod text text2 "text three"
+}
+
+Rule {
+	SocketGroup RGBWrgbw
+}
+
+Rule {
+	Identified
+	Corrupted
+	ElderItem
+	ShaperItem
+	ShapedMap
+
+	Identified true
+	Corrupted true
+	ElderItem true
+	ShaperItem true
+	ShapedMap true
+
+	Identified false
+	Corrupted false
+	ElderItem false
+	ShaperItem false
+	ShapedMap false
+}
+
+Redefine $n Number 30
+Rule {
+	SetFontSize 20
+	SetFontSize $n
+
+	SetTextSize 20
+	SetTextSize $n
+}
+
+Rule {
+	SetBorderColor 255 255 255
+	SetBorderColor 255 255 255 255
+	SetBorderColor xfff
+	SetBorderColor xffff
+	SetBorderColor xffffff
+	SetBorderColor xffffffff
+	SetBorderColor $c
+	SetBorderColor $c : 10
+	SetBorderColor $c : $n
+
+	SetTextColor xfff
+	SetFontColor xfff
+	SetBackgroundColor xfff
+}
+
+Rule {
+	PlayAlertSound 1
+	PlayAlertSound 1 20
+	PlayAlertSound $n
+	PlayAlertSound $n 20
+	PlayAlertSound 1 $n
+	PlayAlertSound $n $n
+
+	PlayAlertSound ItemFilterAlert10
+	PlayAlertSound ItemFilterAlert11
+	PlayAlertSound ItemFilterAlert12
+	PlayAlertSound ItemFilterAlert13
+	PlayAlertSound ItemFilterAlert14
+	PlayAlertSound ItemFilterAlert15
+	PlayAlertSound ItemFilterAlert16
+	PlayAlertSound ShAlchemy
+	PlayAlertSound ShBlessed
+	PlayAlertSound ShChaos
+	PlayAlertSound ShDivine
+	PlayAlertSound ShExalted
+	PlayAlertSound ShFusing
+	PlayAlertSound ShGeneral
+	PlayAlertSound ShMirror
+	PlayAlertSound ShRegal
+	PlayAlertSound ShVaal
+
+	PlayAlertSound ItemFilterAlert10 20
+	PlayAlertSound ItemFilterAlert10 $n
+}
+
+Rule {
+	PlayAlertSoundPositional 1
+	PlayAlertSoundPositional 1 20
+	PlayAlertSoundPositional $n
+	PlayAlertSoundPositional $n 20
+	PlayAlertSoundPositional 1 $n
+	PlayAlertSoundPositional $n $n
+
+	PlayAlertSoundPositional ItemFilterAlert10
+	PlayAlertSoundPositional ItemFilterAlert11
+	PlayAlertSoundPositional ItemFilterAlert12
+	PlayAlertSoundPositional ItemFilterAlert13
+	PlayAlertSoundPositional ItemFilterAlert14
+	PlayAlertSoundPositional ItemFilterAlert15
+	PlayAlertSoundPositional ItemFilterAlert16
+	PlayAlertSoundPositional ShAlchemy
+	PlayAlertSoundPositional ShBlessed
+	PlayAlertSoundPositional ShChaos
+	PlayAlertSoundPositional ShDivine
+	PlayAlertSoundPositional ShExalted
+	PlayAlertSoundPositional ShFusing
+	PlayAlertSoundPositional ShGeneral
+	PlayAlertSoundPositional ShMirror
+	PlayAlertSoundPositional ShRegal
+	PlayAlertSoundPositional ShVaal
+
+	PlayAlertSoundPositional ItemFilterAlert10 20
+	PlayAlertSoundPositional ItemFilterAlert10 $n
+}
+
+Rule {
+	DisableDropSound
+	DisableDropSound true
+	DisableDropSound false
+	Hidden
+	Hidden true
+	Hidden false
+}
+
+Rule {
+	CustomAlertSound "C:\File.waw"
+	CustomAlertSound $f
+}
+
+Redefine $n Number 0
+Rule {
+	MinimapIcon 0 Red Circle
+	MinimapIcon 1 Red Circle
+	MinimapIcon 2 Red Circle
+	MinimapIcon $n Red Circle
+
+	MinimapIcon 0 Green Circle
+	MinimapIcon 0 Blue Circle
+	MinimapIcon 0 Brown Circle
+	MinimapIcon 0 White Circle
+	MinimapIcon 0 Yellow Circle
+
+	MinimapIcon 0 Red Diamond
+	MinimapIcon 0 Red Hexagon
+	MinimapIcon 0 Red Square
+	MinimapIcon 0 Red Star
+	MinimapIcon 0 Red Triangle
+}
+
+Rule {
+	PlayEffect Red
+	PlayEffect Green
+	PlayEffect Blue
+	PlayEffect Brown
+	PlayEffect White
+	PlayEffect Yellow
+	PlayEffect Red Temp
+}
+
+Rule {
+	UseStyle $s
+}
+
+Rule {
+	BaseType "Base"
+	CustomAlertSound "Base"
+	Rule {
+		Class "Inner"
+		CustomAlertSound "Inner"
+	}
+	Default {
+		CustomAlertSound "Default"
+	}
+}
+
+Rule Override {
+}
+
+Rule {
+	Override SetFontSize 30
+}
+

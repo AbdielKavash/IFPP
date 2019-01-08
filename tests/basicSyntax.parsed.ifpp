@@ -1,0 +1,277 @@
+[0] Version 2.0.0
+
+[1] Define $n Number 42
+
+
+[2] Define $n Number 1
+
+
+[3] Define $c Color 255 0 0 255
+
+
+[4] Define $c Color 255 0 0 0
+
+
+[5] Define $c Color 1 0 0 255
+
+
+[6] Define $c Color 1 0 0 1
+
+
+[7] Define $c2 Color 1 0 0 100
+
+
+[8] Define $c Color 170 187 204 255
+
+
+[9] Define $c Color 170 187 204 221
+
+
+[10] Define $c Color 10 11 12 255
+
+
+[11] Define $c Color 10 11 12 13
+
+
+[12] Define $f File "C:/File.txt"
+
+
+[13] Define $f File "C:/File2.txt"
+
+
+[14] Define $l List "item" "item2" "item three" "item4" "item5"
+
+
+[15] Define $l2 List "item" "item2" "item three" "item4" "item5" "added thing"
+
+
+[17] Define $s Style {
+[16] SetTextColor 10 11 12 13
+}
+
+
+[18] Rule {
+}
+
+[20] Define $n Number 10
+
+
+[36] Rule {
+	[21] ItemLevel = 50
+	[22] ItemLevel <= 49
+	[23] ItemLevel <= 50
+	[24] ItemLevel = 50
+	[25] ItemLevel >= 50
+	[26] ItemLevel >= 51
+	[27] ItemLevel 10 .. 20
+	[28] ItemLevel <= 9
+	[29] ItemLevel <= 10
+	[30] ItemLevel = 10
+	[31] ItemLevel >= 10
+	[32] ItemLevel >= 11
+	[33] ItemLevel 10 .. 20
+	[34] ItemLevel = 10
+	[35] ItemLevel = 10
+}
+
+[48] Rule {
+	[38] Rarity = Normal
+	[39] Rarity = Magic
+	[40] Rarity = Rare
+	[41] Rarity = Unique
+	[42] Rarity <= Normal
+	[43] Rarity <= Magic
+	[44] Rarity = Magic
+	[45] Rarity >= Magic
+	[46] Rarity >= Rare
+	[47] Rarity Magic .. Rare
+}
+
+[60] Rule {
+	[50] ItemLevel = 1
+	[51] DropLevel = 1
+	[52] Quality = 1
+	[53] Sockets = 1
+	[54] LinkedSockets = 1
+	[55] Height = 1
+	[56] Width = 1
+	[57] StackSize = 1
+	[58] GemLevel = 1
+	[59] MapTier = 1
+}
+
+[65] Rule {
+	[62] Class "text" "text2" "text three"
+	[63] BaseType "text" "text2" "text three"
+	[64] HasExplicitMod "text" "text2" "text three"
+}
+
+[68] Rule {
+	[67] SocketGroup RRGGBBWW
+}
+
+[85] Rule {
+	[70] Identified true
+	[71] Corrupted true
+	[72] ElderItem true
+	[73] ShaperItem true
+	[74] ShapedMap true
+	[75] Identified true
+	[76] Corrupted true
+	[77] ElderItem true
+	[78] ShaperItem true
+	[79] ShapedMap true
+	[80] Identified false
+	[81] Corrupted false
+	[82] ElderItem false
+	[83] ShaperItem false
+	[84] ShapedMap false
+}
+
+[87] Define $n Number 30
+
+
+[92] Rule {
+	[88] SetFontSize 20
+	[89] SetFontSize 30
+	[90] SetFontSize 20
+	[91] SetFontSize 30
+}
+
+[106] Rule {
+	[94] SetBorderColor 255 255 255 255
+	[95] SetBorderColor 255 255 255 255
+	[96] SetBorderColor 255 255 255 255
+	[97] SetBorderColor 255 255 255 255
+	[98] SetBorderColor 255 255 255 255
+	[99] SetBorderColor 255 255 255 255
+	[100] SetBorderColor 10 11 12 13
+	[101] SetBorderColor 10 11 12 10
+	[102] SetBorderColor 10 11 12 30
+	[103] SetTextColor 255 255 255 255
+	[104] SetTextColor 255 255 255 255
+	[105] SetBackgroundColor 255 255 255 255
+}
+
+[133] Rule {
+	[108] PlayAlertSound 1 100
+	[109] PlayAlertSound 1 20
+	[110] PlayAlertSound 30 100
+	[111] PlayAlertSound 30 20
+	[112] PlayAlertSound 1 30
+	[113] PlayAlertSound 30 30
+	[114] PlayAlertSound ItemFilterAlert10 100
+	[115] PlayAlertSound ItemFilterAlert11 100
+	[116] PlayAlertSound ItemFilterAlert12 100
+	[117] PlayAlertSound ItemFilterAlert13 100
+	[118] PlayAlertSound ItemFilterAlert14 100
+	[119] PlayAlertSound ItemFilterAlert15 100
+	[120] PlayAlertSound ItemFilterAlert16 100
+	[121] PlayAlertSound ShAlchemy 100
+	[122] PlayAlertSound ShBlessed 100
+	[123] PlayAlertSound ShChaos 100
+	[124] PlayAlertSound ShDivine 100
+	[125] PlayAlertSound ShExalted 100
+	[126] PlayAlertSound ShFusing 100
+	[127] PlayAlertSound ShGeneral 100
+	[128] PlayAlertSound ShMirror 100
+	[129] PlayAlertSound ShRegal 100
+	[130] PlayAlertSound ShVaal 100
+	[131] PlayAlertSound ItemFilterAlert10 20
+	[132] PlayAlertSound ItemFilterAlert10 30
+}
+
+[160] Rule {
+	[135] PlayAlertSoundPositional 1 100
+	[136] PlayAlertSoundPositional 1 20
+	[137] PlayAlertSoundPositional 30 100
+	[138] PlayAlertSoundPositional 30 20
+	[139] PlayAlertSoundPositional 1 30
+	[140] PlayAlertSoundPositional 30 30
+	[141] PlayAlertSoundPositional ItemFilterAlert10 100
+	[142] PlayAlertSoundPositional ItemFilterAlert11 100
+	[143] PlayAlertSoundPositional ItemFilterAlert12 100
+	[144] PlayAlertSoundPositional ItemFilterAlert13 100
+	[145] PlayAlertSoundPositional ItemFilterAlert14 100
+	[146] PlayAlertSoundPositional ItemFilterAlert15 100
+	[147] PlayAlertSoundPositional ItemFilterAlert16 100
+	[148] PlayAlertSoundPositional ShAlchemy 100
+	[149] PlayAlertSoundPositional ShBlessed 100
+	[150] PlayAlertSoundPositional ShChaos 100
+	[151] PlayAlertSoundPositional ShDivine 100
+	[152] PlayAlertSoundPositional ShExalted 100
+	[153] PlayAlertSoundPositional ShFusing 100
+	[154] PlayAlertSoundPositional ShGeneral 100
+	[155] PlayAlertSoundPositional ShMirror 100
+	[156] PlayAlertSoundPositional ShRegal 100
+	[157] PlayAlertSoundPositional ShVaal 100
+	[158] PlayAlertSoundPositional ItemFilterAlert10 20
+	[159] PlayAlertSoundPositional ItemFilterAlert10 30
+}
+
+[168] Rule {
+	[162] DisableDropSound true
+	[163] DisableDropSound true
+	[164] DisableDropSound false
+	[165] Hidden true
+	[166] Hidden true
+	[167] Hidden false
+}
+
+[172] Rule {
+	[170] CustomAlertSound "C:\File.waw"
+	[171] CustomAlertSound "C:/File2.txt"
+}
+
+[174] Define $n Number 0
+
+
+[189] Rule {
+	[175] MinimapIcon 0 Red Circle
+	[176] MinimapIcon 1 Red Circle
+	[177] MinimapIcon 2 Red Circle
+	[178] MinimapIcon 0 Red Circle
+	[179] MinimapIcon 0 Green Circle
+	[180] MinimapIcon 0 Blue Circle
+	[181] MinimapIcon 0 Brown Circle
+	[182] MinimapIcon 0 White Circle
+	[183] MinimapIcon 0 Yellow Circle
+	[184] MinimapIcon 0 Red Diamond
+	[185] MinimapIcon 0 Red Hexagon
+	[186] MinimapIcon 0 Red Square
+	[187] MinimapIcon 0 Red Star
+	[188] MinimapIcon 0 Red Triangle
+}
+
+[198] Rule {
+	[191] PlayEffect Red 
+	[192] PlayEffect Green 
+	[193] PlayEffect Blue 
+	[194] PlayEffect Brown 
+	[195] PlayEffect White 
+	[196] PlayEffect Yellow 
+	[197] PlayEffect Red Temp
+}
+
+[201] Rule {
+	[200] SetTextColor 10 11 12 13
+}
+
+[211] Rule {
+	[203] BaseType "Base"
+	[204] CustomAlertSound "Base"
+	[207] Rule {
+		[205] Class "Inner"
+		[206] CustomAlertSound "Inner"
+	}
+	[210] Default{
+		[209] CustomAlertSound "Default"
+	}
+}
+
+[213] Rule Override {
+}
+
+[216] Rule {
+	[215] Override SetFontSize 30
+}

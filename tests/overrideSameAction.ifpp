@@ -1,0 +1,27 @@
+###########
+# Overriding the same action over and over with different conditions.
+# Problem: creates rules for all combinations of conditions,
+# even though only one rule per condition is needed.
+#
+# We would need to add the rules in reverse order for this to work right (?)
+###
+
+Rule {
+	Identified true
+	CustomAlertSound "Identified"
+}
+
+Rule AddOnly {
+	Corrupted true
+	Override CustomAlertSound "Corrupted"
+}
+
+Rule AddOnly {
+	ShaperItem true
+	Override CustomAlertSound "ShaperItem"
+}
+
+Rule AddOnly {
+	ElderItem true
+	Override CustomAlertSound "ElderItem"
+}

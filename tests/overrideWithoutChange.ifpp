@@ -1,0 +1,14 @@
+###########
+# Overriding a rule even if no actions were changed.
+# Problem: creates redundant rules.
+###
+
+Rule {
+	Class "Class"
+	Final CustomAlertSound "Class"
+}
+
+Rule {
+	BaseType "BaseType"
+	CustomAlertSound "BaseType"
+}

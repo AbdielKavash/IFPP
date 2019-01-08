@@ -1,0 +1,458 @@
+\input texinfo
+@macro ifppversion
+1.0.0
+@end macro
+
+@macro poeversion
+3.4.x
+@end macro
+
+@macro secIntro
+Introduction
+@end macro
+
+@macro secUsing
+Using IFPP
+@end macro
+
+@macro secSyntax
+IFPP Syntax
+@end macro
+
+@macro secExample
+A Complete Example
+@end macro
+
+@macro secErrors
+IFPP Errors
+@end macro
+
+@macro secPerformance
+Performance Considerations
+@end macro
+
+@macro secCompNative
+Compatibility with Native Filters
+@end macro
+
+@macro secCompVersion
+Compatibility with Different Versions
+@end macro
+
+@macro secHistory
+Version History
+@end macro
+
+@macro secContact
+Contact
+@end macro
+
+@macro secIndex
+Index
+@end macro
+
+@settitle IFPP - Item Filter Preprocessor, version @ifppversion
+
+@contents
+
+@node Top
+@top Manual for IFPP - Item Filter Preprocessor
+
+This is the manual for IFPP - Item Filter Preprocessor (version @ifppversion) for Path of Exile.
+This version of IFPP is designed to be compatible with Path of Exile version @poeversion, although will probably work with later versions of PoE as well.
+
+Created by Abdiel Kavash, 2018.
+
+@menu
+List of sections:
+* @secIntro:: What is IFPP.
+
+What you need to know to make an item filter using IFPP:
+* @secUsing:: How to use IFPP.
+* @secSyntax:: Details of the IFPP filter syntax.
+* @secExample:: A complete example of writing an IFPP filter, line by line.
+* @secErrors:: How to read the error log to figure out what went wrong.
+* @secPerformance:: What to keep in mind to make your filter work faster.
+
+Boring programmer stuff:
+* @secCompNative:: Adding IFPP features to existing native filters.
+* @secCompVersion:: Compatibility considerations for newer version of both IFPP and PoE.
+* @secHistory:: History of IFPP releases and plans for upcoming features.
+* @secContact:: How to get in touch with me to give feedback or report bugs.
+
+* @secIndex:: Index of contents.
+@end menu
+
+
+
+@node @secIntro
+@chapter @secIntro
+
+IFPP is a preprocessor for @url{https://pathofexile.gamepedia.com/Item_filter,item filters} for @url{https://www.pathofexile.com,Path of Exile}, an action RPG developed by @url{http://www.grindinggear.com,Grinding Gear Games}. This program allows item filter creators to use a much more powerful syntax than that of native item filters provided by GGG. Instead of comparing items with one rule at a time, and stopping immediately when a matching rule is found; an IFPP filter continues looking for more rules that can add further styles to the display of dropped items.
+
+For example, let's say you want to display normal items as white, magic items as blue, rare yellow, and unique orange. But you also want to add a white border around all items with linked red, green, and blue sockets for the Chromatic Orb vendor recipe. Using the native item filter syntax provided by GGG, you need a separate rule for each rarity both with and without the RGB socket group:
+
+@example
+Show
+    Rarity Normal
+    SocketGroup RGB
+    SetTextColor 200 200 200
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Normal
+    SetTextColor 200 200 200
+
+Show
+    Rarity Magic
+    SocketGroup RGB
+    SetTextColor 136 136 255
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Magic
+    SetTextColor 136 136 255
+
+Show
+    Rarity Rare
+    SocketGroup RGB
+    SetTextColor 255 255 119
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Rare
+    SetTextColor 255 255 119
+
+Show
+    Rarity Unique
+    SocketGroup RGB
+    SetTextColor 175 96 37
+    SetBorderColor 255 255 255
+
+Show
+    Rarity Unique
+    SetTextColor 175 96 37
+@end example
+
+If you want to add more and more independent conditions, you need to add a new rule for every possible combination. This results in large amounts of reused code, poor readability, and filters which are difficult to maintain and modify. For example, if you wanted to change the color of the border for RGB items, you would have to change it in all of the rules.
+
+With IFPP, you can write the same filter like this:
+
+@example
+RULE
+    Rarity Normal
+    SetTextColor 200 200 200
+
+RULE
+    Rarity Magic
+    SetTextColor 136 136 255
+
+RULE
+    Rarity Rare
+    SetTextColor 255 255 119
+
+RULE
+    Rarity Unique
+    SetTextColor 175 96 37
+
+RULE
+    SocketGroup RGB
+    APPEND SetBorderColor 255 255 255
+@end example
+
+The @code{APPEND} keyword in the last rule tells IFPP to add the border color to all matching items, together with any other styles that have been already applied to them above.
+
+In addition to this powerful functionality, IFPP provides several quality of life improvements over GGG native filters, including reusing values and code using variables, incremental rules, ``syntactic sugar'' like hexadecimal values for colors, and more.
+
+This manual assumes the reader has a basic knowledge of writing item filters for PoE. For more information on item filters, see the @url{https://pathofexile.gamepedia.com/Item_filter_guide,item filter guide} at the unofficial PoE wiki.
+
+Version @ifppversion of IFPP is designed to be fully compatible with Path of Exile version @poeversion, although the created filters will most likely function correctly in more recent versions of PoE as well. See @ref{@secCompVersion} for details.
+
+
+
+
+@node @secUsing
+@cindex Using IFPP
+@chapter @secUsing
+
+IFPP works as a @emph{preprocessor}. The program takes a filter using the enhanced IFPP syntax as an input, and creates from it an item filter executing the same rules using only the native GGG syntax that can be read by Path of Exile. From here on, we will always refer to filters with the added features of IFPP as ``@emph{IFPP filters}'', and to filters using only the standard syntax provided by GGG as ``@emph{native filters}''.
+
+The workflow of using IFPP looks like this:
+
+@enumerate
+@item Write your IFPP filter using the enhanced syntax options described in this manual.
+@item Run the IFPP preprocessor on this filter to generate a native filter.
+@item Copy the created native filter into the usual location for item filters (@file{\My Documents\My Games\Path of Exile\}).
+@item Load your filter in PoE and play!
+@end enumerate
+
+Currently, IFPP is only available as a command line utility (GUI version to come soon). The syntax is the following:
+
+@example
+ifpp <@emph{input file}> [@emph{output file}] [@emph{log file}]
+@end example
+
+The input file is the IFPP filter you have created, and has by convention the extension @code{.ifpp}. The output file is the native filter that will be created by IFPP. Use the extension @code{.filter} for it to be usable by Path of Exile. The optional log file lists possible problems with your IFPP filter.
+
+If you do not specify either the output or the log file, the same file name as the input (with its extension stripped) will be used for both, with the extensions @code{.filter} and @code{.log} respectively. If you use "@code{-}" in place of either file name, it will be written to the console instead.
+
+
+
+@node @secSyntax
+@cindex IFPP syntax
+@chapter @secSyntax
+
+This section describes the syntax of IFPP filter files.
+
+Contents:
+
+@menu
+* Basics:: Basics and formatting details.
+* Comments:: Commenting your filter.
+* Rules:: Specifying rules for matching items and applying styles to them.
+* Variables:: Defining and using variables.
+* Special Instructions:: Special instructions to control an IFPP filter.
+@end menu
+
+@node Basics
+@section Basics
+
+The IFPP filter syntax largely resembles the syntax of native PoE filters. It also consists of a series of rules, with conditions describing the items to be matched and actions applying visual styles to them. In fact, every native filter is also a valid IFPP filter, and will produce the same filter (up to formatting differences) as an output if ran through IFPP. However, in addition to this, IFPP also offers many new syntax features extending the native filters.
+
+IFPP filters are always case-insensitive. Writing @code{RULE APPEND} is the same as @code{Rule Append} or @code{rule append} and so on. In this manual, we will use @code{ALL CAPS} for IFPP-specific syntax, in order to clearly distinguish it from keywords used by native filters. However, you should not feel restricted by this: if you prefer writing your keywords with a proper capitalization, you are free to do so (and in fact the author writes his filters in this way).
+
+Horizontal whitespace (spaces and tabs) never matters in IFPP filters. You are free to indent your filters in whatever way you wish. However, vertical whitespace (new lines) does: every IFPP instruction must be written on a separate line, and blank lines have a special meaning in some cases. A line containing only whitespace is considered blank; but a line containing a @ref{Comments,comment} is not.
+
+An IFPP filter consists of three different types of commands: @ref{Rules,rules}, @ref{Variables,variable definitions}, and @ref{Special Instructions,special instructions}.
+Rules form the core of an item filter. Similarly to native filters, a rule defines conditions on items to match, and actions to perform for all matched items.
+Variables can store values (such as numbers or item names) which can then be referenced later in the filter.
+Special instructions affect the behavior of IFPP in various ways.
+
+@node Comments
+@cindex Comments
+@section Comments
+
+IFPP offers three different styles of comments:
+
+@example
+# Native filter style single line comments.
+@end example
+
+@example
+// C-style single line comments.
+@end example
+
+@example
+/* C++ - style
+multi-line
+comments. */
+@end example
+
+Comments are in all cases ignored and have no impact on (and will not be output to) the final native filter.
+
+@node Rules
+@cindex Rules
+@cindex @code{RULE}
+@section Rules
+
+Rule sections make up the core part of an IFPP filter. Just like in a native filter, a rule consists of several @ref{Conditions,conditions}, which specify items that should be matched by this rule; and @ref{Actions,actions} which specify what to do with the matching items - usually apply some visual style. Unlike in native filters, however, processing an item does not end with the first matching rule. Subsequent rules can change and override styles that were applied to an item by previous rules. The various ways in which rules affect each other are specified by @ref{Modifiers,modifiers}.
+
+@menu
+* Basic Syntax:: Basic syntax of writing rules.
+* Conditions:: Specifying conditions on items to match.
+* Actions:: Specifying actions to perform on matched items.
+* Modifiers:: Specifying ways in which different rules matching the same rules interact.
+* Incremental Rules:: Applying different actions to the same item under different conditions.
+@end menu
+
+
+
+@node Basic Syntax
+@subsection Basic Syntax
+
+The basic syntax of writing a rule is the following:
+
+@example
+RULE [@emph{modifiers}] @{
+    [@emph{conditions}]
+    [@emph{actions}]
+@}
+@end example
+
+The opening brace can be on the same line as the @code{RULE} header, or on the line immediately following it. You can omit the braces, in this case the rule contains all commands until the next blank line. (A line containing only whitespace is considered blank, but a line containing a comment is not.) If the rule has no modifiers, the entire header can also be omitted. The modifier @code{APPEND} is assumed in this case. See @ref{Modifiers} for details.
+
+This means that all of the following are valid rules which produce the same output:
+
+@example
+RULE APPEND @{
+    BaseType "Exalted Orb"
+    PlayAlertSound 8 200
+@}
+@end example
+
+@example
+RULE APPEND @{
+    BaseType "Exalted Orb"
+
+    PlayAlertSound 8 200
+@}
+@end example
+
+@example
+RULE APPEND
+@{
+    BaseType "Exalted Orb"
+    PlayAlertSound 8 200
+@}
+@end example
+
+@example
+RULE APPEND
+    BaseType "Exalted Orb"
+    PlayAlertSound 8 200
+@end example
+
+@example
+RULE APPEND
+    BaseType "Exalted Orb"
+    # Money!
+    PlayAlertSound 8 200
+@end example
+
+@example
+BaseType "Exalted Orb"
+PlayAlertSound 8 200
+@end example
+
+Again, keep in mind that if you do not use braces, the rule only takes commands until the next blank line! The following are @strong{two separate rules}, which is probably not what you want:
+
+@example
+RULE
+    BaseType "Exalted Orb"
+
+    PlayAlertSound 8 200
+@end example
+
+A rule can be defined with no conditions; in this case the rule applies to @emph{all} items. You can use this, for example, to hide all items not matched by the rest of your filter. A rule with no actions is also valid, although such a rule will usually not do anything.
+
+Finally, instead of the @code{RULE} keyword, a rule can also begin with either @code{SHOW} or @code{HIDE}. The keyword @code{SHOW} is equivalent to @code{RULE APPEND FINAL}, and @code{HIDE} is equivalent to @code{RULE APPEND FINAL} with an additional action @code{HIDDEN} added at the end. However, this is purely for compatibility with native filters. Some special features of IFPP might not work in the expected way inside of rules declared with @code{SHOW} or @code{HIDE}. Therefore, if you are writing an IFPP filter from scratch, @strong{do not use the keywords @code{SHOW} or @code{HIDE} like this}. Only use @code{RULE} to declare a rule.
+
+
+
+@node Conditions
+@cindex Conditions
+@subsection Conditions
+
+Just like in native filters, the conditions of a rule specify which items the rule should be applied to. Version @ifppversion of IFPP supports all conditions that can be used in native filters as of PoE version @poeversion. Namely, here is the full list of supported conditions:
+
+@example
+ItemLevel
+DropLevel
+Quality
+Sockets
+LinkedSockets
+Height
+Width
+StackSize
+GemLevel
+MapTier
+
+Class
+BaseType
+HasExplicitMod
+
+Identified
+Corrupted
+ElderItem
+ShaperItem
+ShapedMap
+
+Rarity
+SocketGroup
+@end example
+
+The syntax of all conditions is the same as in native filters. Notably, for conditions that take a list of strings (@code{Class}, @code{BaseType}, and @code{HasExplicitMod}), every string is matched separately. So @code{Class One Hand} will match any item with either ``One'' or ``Hand'' in its class. To match items with the class ``One Hand'', use quotes: @code{Class "One Hand"}, just like you would do in a native filter. Also as in native filters, a rule with multiple conditions will only match items which satisfy all of the conditions.
+
+Conditions which make a numerical comparison (in the first group listed above) will perform a bounds check on the value given. A value that is out of the possible range for a condition, such as @code{Sockets > 8}, results in a warning.
+
+
+
+@node Actions
+@subsection Actions
+
+The actions of a rule specify what to do with the items that match the rule. Most of the time, this changes the way the label of the item is displayed. All the actions used by native filters as of PoE version @poeversion are supported, namely:
+
+@example
+SetTextColor
+SetBackgroundColor
+SetBorderColor
+
+SetFontSize
+
+PlayAlertSound
+PlayAlertSoundPositional
+
+CustomAlertSound
+MinimapIcon
+PlayEffect
+DisableDropSound
+@end example
+
+The syntax of all actions is the same as in native filters. Actions which take a numerical argument perform a bounds check. If a value is out of the possible range for an action, IFPP gives a warning and adjusts the value to fit within the allowed bounds.
+
+In addition to these, IFPP provides two new actions:
+
+@example
+HIDDEN [@emph{true}/@emph{false}]
+@end example
+
+When set to @code{true}, this action behaves just like a @code{Hide} block in a native filter: it makes the item not display a label at all. However, all other actions in the rule are still applied to the item. Sounds, minimap icons, and light beams still work; and the label will be displayed with the proper style when the ``Highlight Items'' key is held. The value of the @code{HIDDEN} action can also be overridden by later rules, just like any other action!
+
+Note that the spelling of the action is @code{HIDDEN}, not @code{Hide} as in native filters. There are unfortunate technical reasons that prevent IFPP from using the same keyword.
+
+@example
+USESTYLE [@emph{variable}]
+@end example
+
+This action adds all actions defined in the given @ref{Variables,variable} to the rule. The variable must be of type @code{STYLE}, otherwise IFPP gives an error and this action is ignored.
+
+@node Modifiers
+@subsection Modifiers
+
+@node Incremental Rules
+@subsection Incremental Rules
+
+
+@node Variables
+@section Variables
+
+@node Special Instructions
+@section Special Instructions
+
+@node @secExample
+@chapter @secExample
+
+@node @secErrors
+@chapter @secErrors
+
+@node @secPerformance
+@chapter @secPerformance
+
+@node @secCompNative
+@chapter @secCompNative
+
+@node @secCompVersion
+@chapter @secCompVersion
+
+@node @secHistory
+@chapter @secHistory
+
+@node @secContact
+@chapter @secContact
+
+@node @secIndex
+@unnumbered @secIndex
+
+@printindex cp
+
+@bye
