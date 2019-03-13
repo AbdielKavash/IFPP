@@ -17,18 +17,19 @@ public:
 		varNumber(), varColor(), varFile(), varList(), varStyle() {};
 		
 	void reset();
+	void parse();
 	
 	bool versionCheck(int vMajor, int vMinor, int vPatch) const;
 		
-	void defineVariable(const std::string & name, ifpp::VariableType type, int value);
-	void defineVariable(const std::string & name, ifpp::VariableType type, const ifpp::Color & value);
-	void defineVariable(const std::string & name, ifpp::VariableType type, const std::string & value);
-	void defineVariable(const std::string & name, ifpp::VariableType type, const ifpp::NameList & value);
-	void defineVariable(const std::string & name, ifpp::VariableType type, const ifpp::Style & value);
+	void defineVariable(const std::string & name, ifpp::ExprType type, int value);
+	void defineVariable(const std::string & name, ifpp::ExprType type, const ifpp::Color & value);
+	void defineVariable(const std::string & name, ifpp::ExprType type, const std::string & value);
+	void defineVariable(const std::string & name, ifpp::ExprType type, const ifpp::NameList & value);
+	void defineVariable(const std::string & name, ifpp::ExprType type, const ifpp::Style & value);
 	
 	void undefineVariable(const std::string & name);
 
-	ifpp::VariableType getVarType(const std::string & name) const;
+	ifpp::ExprType getVarType(const std::string & name) const;
 
 	int getVarValueNumber(const std::string & name) const;
 	const ifpp::Color & getVarValueColor(const std::string & name) const;

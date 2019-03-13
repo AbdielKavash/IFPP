@@ -1,8 +1,8 @@
 #ifndef IFPP_RULE_OPERATIONS_H
 #define IFPP_RULE_OPERATIONS_H
 
-#include "ifppTypes.h"
-#include "ifppCompiler.h"
+#include "Types.h"
+#include "Compiler.h"
 
 namespace ifpp {
 

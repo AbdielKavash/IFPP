@@ -64,8 +64,8 @@ std::ostream & operator<<(std::ostream & os, const Color & c) {
 }
 
 SocketGroup::SocketGroup(const std::string & sockets) : r(0), g(0), b(0), w(0) {
-	for (size_t i = 0; i < sockets.size(); ++i) {
-		switch (sockets[i]) {
+	for (char s : sockets) {
+		switch (s) {
 			case 'r': case 'R': ++r; break;
 			case 'g': case 'G': ++g; break;
 			case 'b': case 'B': ++b; break;
@@ -94,46 +94,28 @@ std::ostream & operator<<(std::ostream & os, const NameList & nl) {
 	return os;
 }
 
-std::string modString(ModifierList ml) {
-	if (ml == MOD_OVERRIDE) return "Override";
-	if (ml == MOD_APPEND) return "Append";
-	if (ml == MOD_FINAL) return "Final";
-	if (ml == MOD_ADDONLY) return "Final";
-	if (ml == MOD_SHOW) return "Show";
-	if (ml == MOD_HIDE) return "Hide";
-	throw InternalError("Attempting to convert unknown or compound modifier to string!", __FILE__, __LINE__);
-}
-
-std::ostream & print(std::ostream & os, PrintStyle ps, ModifierList ml) {
+std::ostream & print(std::ostream & os, PrintStyle ps, TagList t) {
 	switch (ps) {
-		case PRINT_IFPP:
-			if (ml & MOD_OVERRIDE) os << "Override ";
-			if (ml & MOD_APPEND) os << "Append ";
-			if (ml & MOD_FINAL) os << "Final ";
-			if (ml & MOD_ADDONLY) os << "AddOnly ";
-			if (ml & MOD_SHOW) os << "Show ";
-			if (ml & MOD_HIDE) os << "Hide ";
-			return os;
-		case PRINT_NATIVE: throw InternalError("Attempting to write modifiers to native filter!", __FILE__, __LINE__);
+		case PRINT_IFPP: return os << std::string(IFPP_TABS, '\t') << (t & TAG_OVERRIDE ? "Override" : "");
+		case PRINT_NATIVE: throw InternalError("Attempting to write IFPP-only modifier to native filter!", __FILE__, __LINE__);
 		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
 	}
 }
-
 
 
 /***********
 * ENUMS
 ***********/
 
-std::ostream & operator<<(std::ostream & os, VariableType vt) {
-	switch (vt) {
-		case VAR_NUMBER: return os << "Number";
-		case VAR_COLOR: return os << "Color";
-		case VAR_FILE: return os << "File";
-		case VAR_LIST: return os << "List";
-		case VAR_STYLE: return os << "Style";
-		case VAR_UNDEFINED: return os << "Undefined";
-		default: throw UnhandledCase("Variable type", __FILE__, __LINE__);
+std::ostream & operator<<(std::ostream & os, ExprType et) {
+	switch (et) {
+		case EXPR_NUMBER: return os << "Number";
+		case EXPR_COLOR: return os << "Color";
+		case EXPR_FILE: return os << "File";
+		case EXPR_LIST: return os << "List";
+		case EXPR_STYLE: return os << "Style";
+		case EXPR_ERROR: return os << "Error";
+		default: throw UnhandledCase("Expression type", __FILE__, __LINE__);
 	}
 }
 
@@ -148,9 +130,59 @@ std::ostream & operator<<(std::ostream & os, Operator o) {
 	}
 }
 
+/***********
+* STATEMENTS
+***********/
+
+std::ostream & Statement::printSelf(std::ostream & os, PrintStyle ps) const {
+	switch (ps) {
+		case PRINT_IFPP: return os << std::string(IFPP_TABS, '\t') << "[" << guid << "] ";
+		case PRINT_NATIVE: return os << std::string(IFPP_TABS, '\t');
+		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
+	}
+}
+
+std::ostream & print(std::ostream & os, PrintStyle ps, const FilterIFPP & f) {
+	bool first = true;
+	for (const auto & stm : f) {
+		if (!first) os << std::endl;
+		first = false;
+		print(os, ps, stm);
+	}
+	return os;
+}
+
+std::ostream & Instruction::printSelf(std::ostream & os, PrintStyle ps) const {
+	switch (ps) {
+		case PRINT_IFPP: return Statement::printSelf(os, ps) << what;
+		case PRINT_NATIVE: throw InternalError("Attempting to write IFPP-only instruction to native filter!", __FILE__, __LINE__);
+		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
+	}
+}
+
+std::ostream & InstructionVersion::printSelf(std::ostream & os, PrintStyle ps) const {
+	return Instruction::printSelf(os, ps) << ' ' << vMajor << '.' << vMinor << '.' << vPatch << std::endl;
+}
+
+InstructionVersion * InstructionVersion::clone() const {
+	return new InstructionVersion(vMajor, vMinor, vPatch);
+}
+
+std::ostream & DefinitionBase::printSelf(std::ostream & os, PrintStyle ps) const {
+	switch (ps) {
+		case PRINT_IFPP: return Statement::printSelf(os, ps) << "Define " << varName << ' ' << varType /*<< ' ' << value*/;
+		case PRINT_NATIVE: throw InternalError("Attempting to write a variable definition to native filter!", __FILE__, __LINE__);
+		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
+	}
+}
+
+/***********
+* COMMANDS
+***********/
+
 std::ostream & Command::printSelf(std::ostream & os, PrintStyle ps) const {
 	switch (ps) {
-		case PRINT_IFPP: return os << std::string(IFPP_TABS, '\t') << '[' << guid << "] ";
+		case PRINT_IFPP: return os << std::string(IFPP_TABS, '\t') << "[" << guid << "] ";
 		case PRINT_NATIVE: return os << std::string(IFPP_TABS, '\t');
 		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
 	}
@@ -206,7 +238,7 @@ std::ostream & ConditionInterval::printSelf(std::ostream & os, PrintStyle ps) co
 }
 
 ConditionInterval * ConditionInterval::clone() const {
-	return new ConditionInterval(what, from, to);
+	return new ConditionInterval(what, from, to, tags);
 }
 
 std::ostream & ConditionNameList::printSelf(std::ostream & os, PrintStyle ps) const {
@@ -214,7 +246,7 @@ std::ostream & ConditionNameList::printSelf(std::ostream & os, PrintStyle ps) co
 }
 
 ConditionNameList * ConditionNameList::clone() const {
-	return new ConditionNameList(what, nameList);
+	return new ConditionNameList(what, nameList, tags);
 }
 
 std::ostream & ConditionSocketGroup::printSelf(std::ostream & os, PrintStyle ps) const {
@@ -222,7 +254,7 @@ std::ostream & ConditionSocketGroup::printSelf(std::ostream & os, PrintStyle ps)
 }
 
 ConditionSocketGroup * ConditionSocketGroup::clone() const {
-	return new ConditionSocketGroup(what, socketGroup);
+	return new ConditionSocketGroup(what, socketGroup, tags);
 }
 
 std::ostream & ConditionBool::printSelf(std::ostream & os, PrintStyle ps) const {
@@ -230,7 +262,7 @@ std::ostream & ConditionBool::printSelf(std::ostream & os, PrintStyle ps) const 
 }
 
 ConditionBool * ConditionBool::clone() const {
-	return new ConditionBool(what, value);
+	return new ConditionBool(what, value, tags);
 }
 
 
@@ -242,15 +274,11 @@ ConditionBool * ConditionBool::clone() const {
 std::ostream & Action::printSelf(std::ostream & os, PrintStyle ps) const {
 	Command::printSelf(os, ps);
 	switch (ps) {
-		case PRINT_IFPP: print(os, ps, modifiers); break;
+		case PRINT_IFPP: print(os, ps, tags); break;
 		case PRINT_NATIVE: break;
 		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
 	}
 	return os << what;
-}
-
-bool Action::hasMod(ModifierList ml) const {
-	return modifiers & ml;
 }
 
 std::ostream & operator<<(std::ostream & os, const Style & s) {
@@ -260,90 +288,32 @@ std::ostream & operator<<(std::ostream & os, const Style & s) {
 	return os;
 }
 
-std::ostream & DefaultStyle::printSelf(std::ostream & os, PrintStyle ps) const {
+std::ostream & Ignore::printSelf(std::ostream & os, PrintStyle ps) const {
 	switch (ps) { 
 		case PRINT_IFPP:
 			Command::printSelf(os, ps);			
-			os << what << '{' << std::endl;
-			++IFPP_TABS;
-			print(os, ps, style);
-			--IFPP_TABS;
-			os << std::string(IFPP_TABS, '\t') << '}' << std::endl;
-			return os;
+			return os << what << std::endl;
 		case PRINT_NATIVE:
-			throw InternalError("Attempting to print a Default action to native filter!", __FILE__, __LINE__);
+			throw InternalError("Attempting to print a DefaultIgnore to native filter!", __FILE__, __LINE__);
 		default:
 			throw UnhandledCase("Print style", __FILE__, __LINE__);
 	}
 }
 
-DefaultStyle * DefaultStyle::clone() const {
-	Style s;
-	for (const auto & a : style) s.push_back(a->clone());
-	return new DefaultStyle(s);
+Ignore * Ignore::clone() const {
+	return new Ignore(tags);
 }
 
 
 /***********
-* STATEMENTS
+* RULES
 ***********/
-
-std::ostream & Statement::printSelf(std::ostream & os, PrintStyle ps) const {
-	switch (ps) {
-		case PRINT_IFPP: return os << std::string(IFPP_TABS, '\t') << "[" << guid << "] ";
-		case PRINT_NATIVE: return os << std::string(IFPP_TABS, '\t');
-		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
-	}
-}
-
-std::ostream & print(std::ostream & os, PrintStyle ps, const FilterIFPP & f) {
-	bool first = true;
-	for (const auto & stm : f) {
-		if (!first) os << std::endl;
-		first = false;
-		print(os, ps, stm);
-	}
-	return os;
-}
-
-std::ostream & Instruction::printSelf(std::ostream & os, PrintStyle ps) const {
-	switch (ps) {
-		case PRINT_IFPP: return Statement::printSelf(os, ps) << what;
-		case PRINT_NATIVE: throw InternalError("Attempting to write IFPP-only instruction to native filter!", __FILE__, __LINE__);
-		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
-	}
-}
-
-std::ostream & InstructionFlush::printSelf(std::ostream & os, PrintStyle ps) const {
-	return Instruction::printSelf(os, ps) << std::endl;
-}
-
-InstructionFlush * InstructionFlush::clone() const {
-	return new InstructionFlush();
-}
-
-std::ostream & InstructionVersion::printSelf(std::ostream & os, PrintStyle ps) const {
-	return Instruction::printSelf(os, ps) << ' ' << vMajor << '.' << vMinor << '.' << vPatch << std::endl;
-}
-
-InstructionVersion * InstructionVersion::clone() const {
-	return new InstructionVersion(vMajor, vMinor, vPatch);
-}
-
-
-std::ostream & DefinitionBase::printSelf(std::ostream & os, PrintStyle ps) const {
-	switch (ps) {
-		case PRINT_IFPP: return Statement::printSelf(os, ps) << "Define " << varName << ' ' << varType;
-		case PRINT_NATIVE: throw InternalError("Attempting to write a variable definition to native filter!", __FILE__, __LINE__);
-		default: throw UnhandledCase("Print style", __FILE__, __LINE__);
-	}
-}
 
 std::ostream & RuleIFPP::printSelf(std::ostream & os, PrintStyle ps) const {
 	switch (ps) {
 		case PRINT_IFPP:
 			Statement::printSelf(os, ps) << "Rule ";
-			print(os, ps, modifiers) << '{' << std::endl;
+			print(os, ps, tags) << '{' << std::endl;
 			++IFPP_TABS;
 			print(os, ps, commands);
 			--IFPP_TABS;
@@ -355,21 +325,73 @@ std::ostream & RuleIFPP::printSelf(std::ostream & os, PrintStyle ps) const {
 }
 
 RuleIFPP * RuleIFPP::clone() const {
-	RuleIFPP * r = new RuleIFPP(modifiers);
+	RuleIFPP * r = new RuleIFPP(tags);
 	r->commands.reserve(commands.size());
-	for (const auto & c : commands) {
-		r->commands.push_back(c->clone());
-	}
+	for (const auto c : commands) r->commands.push_back(c->clone());
 	return r;
 }
 
-bool RuleIFPP::hasMod(ModifierList ml) const {
-	return modifiers & ml;
+RuleIFPP::~RuleIFPP() {
+	for (const auto c : commands) delete c;
 }
 
-RuleIFPP::~RuleIFPP() {
-	for (const auto & c : commands) delete c;
+std::ostream & Modifier::printSelf(std::ostream & os, PrintStyle ps) const {
+	switch (ps) { 
+		case PRINT_IFPP:
+			Command::printSelf(os, ps);			
+			os << what << " {" << std::endl;
+			++IFPP_TABS;
+			print(os, ps, commands);
+			--IFPP_TABS;
+			os << std::string(IFPP_TABS, '\t') << '}' << std::endl;
+			return os;
+		case PRINT_NATIVE:
+			throw InternalError("Attempting to print a Modifier to native filter!", __FILE__, __LINE__);
+		default:
+			throw UnhandledCase("Print style", __FILE__, __LINE__);
+	}
 }
+
+Modifier * Modifier::clone() const {
+	Modifier * m = new Modifier(tags);
+	m->commands.reserve(commands.size());
+	for (const auto c : commands) m->commands.push_back(c->clone());
+	return m;
+}
+
+Modifier::~Modifier() {
+	for (auto c : commands) delete c;
+}
+
+std::ostream & DefaultStyle::printSelf(std::ostream & os, PrintStyle ps) const {
+	switch (ps) { 
+		case PRINT_IFPP:
+			Command::printSelf(os, ps);			
+			os << what << " {" << std::endl;
+			++IFPP_TABS;
+			print(os, ps, style);
+			--IFPP_TABS;
+			os << std::string(IFPP_TABS, '\t') << '}' << std::endl;
+			return os;
+		case PRINT_NATIVE:
+			throw InternalError("Attempting to print a Default rule to native filter!", __FILE__, __LINE__);
+		default:
+			throw UnhandledCase("Print style", __FILE__, __LINE__);
+	}
+}
+
+DefaultStyle * DefaultStyle::clone() const {
+	DefaultStyle * ds = new DefaultStyle(tags);
+	ds->style.reserve(style.size());
+	for (const auto a : style) ds->style.push_back(a->clone());
+	return ds;
+}
+
+DefaultStyle::~DefaultStyle() {
+	for (auto a : style) delete a;
+}
+
+
 
 int getLimit(const std::string & what, WhichLimit which) {
 	static std::map<std::string, std::pair<int, int> > limits;
@@ -395,7 +417,7 @@ int getLimit(const std::string & what, WhichLimit which) {
 		limits["MinimapIcon"] = std::make_pair(0, 2);		
 
 		defaults["Color"] = 255;
-		defaults["Volume"] = 100; // ???
+		defaults["Volume"] = 300; // LOUDER
 		defaults["FontSize"] = 33;
 	}
 	try {

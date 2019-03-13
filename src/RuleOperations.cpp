@@ -145,7 +145,7 @@ static bool contains(const std::vector<T> & v, const T & t) {
 static const std::vector<std::string> special = {"Class", "BaseType"};
 
 RuleNative * RuleIntersection(const RuleNative * first, const RuleNative * second) {
-	if (first->hasMod(MOD_FINAL)) {
+	if (first->hasTag(MOD_FINAL)) {
 		// First rule is Final and can not be overridden.
 		return const_cast<RuleNative *>(first);
 	}
@@ -154,7 +154,7 @@ RuleNative * RuleIntersection(const RuleNative * first, const RuleNative * secon
 	// Preserve modifiers - Final.
 	// At this point Show or Hide do not exist,
 	// they get deleted when we transform an IFPP rule into a native one and then rebuilt when we print it.
-	RuleNative * result = new RuleNative(second->hasMod(MOD_FINAL) ? MOD_FINAL : 0);
+	RuleNative * result = new RuleNative(second->hasTag(MOD_FINAL) ? MOD_FINAL : 0);
 
 	// All other conditions are intersected by simply adding them to the rule.
 	for (const auto & c : first->conditions) {
@@ -219,7 +219,7 @@ RuleNative * RuleIntersection(const RuleNative * first, const RuleNative * secon
 		// We want to know if it actually changes the rule it overrides.
 		// It might not, because all of first's actions are Final, or all of second's actions are Append.
 		bool changed = false;
-		if (second->hasMod(MOD_FINAL)) {
+		if (second->hasTag(MOD_FINAL)) {
 			// The new rule adds a Final modifier to the previous rule.
 			changed = true;
 		}
@@ -250,8 +250,8 @@ RuleNative * RuleIntersection(const RuleNative * first, const RuleNative * secon
 			const Action * a1 = a.second.first;
 			const Action * a2 = a.second.second;
 
-			if (second->hasMod(MOD_OVERRIDE)) {
-				if (a1 && a1->hasMod(MOD_FINAL)) {
+			if (second->hasTag(TAG_OVERRIDE)) {
+				if (a1 && a1->hasTag(MOD_FINAL)) {
 					// First action is final, do not change.
 					result->addAction(a1);
 				} else if (a2) {
@@ -266,10 +266,10 @@ RuleNative * RuleIntersection(const RuleNative * first, const RuleNative * secon
 					// First action is not defined, second is.
 					result->addAction(a2);
 					changed = true;
-				} else if (a1 && a1->hasMod(MOD_FINAL)) {
+				} else if (a1 && a1->hasTag(MOD_FINAL)) {
 					// First action is Final.
 					result->addAction(a1);
-				} else if (a2 && a2->hasMod(MOD_OVERRIDE)) {
+				} else if (a2 && a2->hasTag(TAG_OVERRIDE)) {
 					// Second action is Override.
 					result->addAction(a2);
 					changed = true;

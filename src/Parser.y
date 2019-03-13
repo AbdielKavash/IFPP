@@ -67,10 +67,10 @@
 		return true;
 	}
 
-	static bool checkVarUse(ifpp::Context & ctx, const yy::location & l, const std::string & name, ifpp::VariableType type) {
-		ifpp::VariableType oldType = ctx.getVarType(name);
-		if (oldType == ifpp::VAR_UNDEFINED) {
-			if (type == ifpp::VAR_LIST) {
+	static bool checkVarUse(ifpp::Context & ctx, const yy::location & l, const std::string & name, ifpp::ExprType type) {
+		ifpp::ExprType oldType = ctx.getVarType(name);
+		if (oldType == ifpp::EXPR_UNDEFINED) {
+			if (type == ifpp::EXPR_LIST) {
 				ctx.errorAt(l) << "Variable " << name << " has not been defined. "
 					<< "It will be ignored in this list." << std::endl;
 			} else {
@@ -79,7 +79,7 @@
 			}
 			return false;
 		} else if (oldType != type) {
-			if (type == ifpp::VAR_LIST) {
+			if (type == ifpp::EXPR_LIST) {
 				ctx.errorAt(l) << "Variable " << name << " is of type " << oldType << ", but this command requires " << type << ". "
 					<< "The variable will be ignored in this list." << std::endl;
 			} else {
@@ -93,11 +93,11 @@
 
 	template <typename T>
 	static ifpp::DefinitionBase * magicDefinition(ifpp::Context & ctx, const yy::location & l,
-		const std::string & name, ifpp::VariableType type, const T & value, bool redefine = false) {
+		const std::string & name, ifpp::ExprType type, const T & value, bool redefine = false) {
 
-		ifpp::VariableType oldType = ctx.getVarType(name);
+		ifpp::ExprType oldType = ctx.getVarType(name);
 		if (redefine) {
-			if (oldType == ifpp::VAR_UNDEFINED) {
+			if (oldType == ifpp::EXPR_UNDEFINED) {
 				ctx.warningAt(l) << "Variable " << name << " has not been defined yet. "
 					<< "It will be defined now. Use the Define command instead to avoid this warning." << std::endl;
 			} else if (oldType != type) {
@@ -109,7 +109,7 @@
 			if (oldType == type) {
 				ctx.warningAt(l) << "Variable " << name << " has already been defined. "
 					<< "It will be replaced by the new value. Use the Redefine command instead to avoid this warning." << std::endl;
-			} else if (oldType != ifpp::VAR_UNDEFINED) {
+			} else if (oldType != ifpp::EXPR_UNDEFINED) {
 				ctx.errorAt(l) << "Variable " << name << " has already been defined as type " << oldType << "! "
 					<< "The variable will be replaced by the new value of type " << type << "." << std::endl;
 				ctx.undefineVariable(name);
@@ -121,14 +121,14 @@
 	}
 
 	static ifpp::ConditionInterval * magicInterval(ifpp::Context & ctx, const yy::location & l,
-		const std::string & what, int from, int to) {
+		const std::string & what, int from, int to, ifpp::TagList tags) {
 
 		clampInterval(ctx, l, what, from, to, ifpp::getLimit(what, ifpp::MIN), ifpp::getLimit(what, ifpp::MAX));
-		return new ifpp::ConditionInterval(what, from, to);
+		return new ifpp::ConditionInterval(what, from, to, tags);
 	}
 
 	static ifpp::ConditionInterval * magicInterval(ifpp::Context & ctx, const yy::location & l,
-		const std::string & what, ifpp::Operator op, int value) {
+		const std::string & what, ifpp::Operator op, int value, ifpp::TagList tags) {
 
 		int from = INT_MIN, to = INT_MAX;
 		switch(op) {
@@ -139,7 +139,7 @@
 			case ifpp::OP_GT: from = value + 1; break;
 			default: throw ifpp::UnhandledCase("Operator", __FILE__, __LINE__);
 		}
-		return magicInterval(ctx, l, what, from, to);
+		return magicInterval(ctx, l, what, from, to, tags);
 	}
 
 	template <typename T> static void listNew(std::vector<T> & l) {
@@ -185,16 +185,18 @@
 	CHR_DOTDOT ".."
 	CHR_COLON ":"
 
-	KW_RULE "Rule"
-	KW_DEFAULT "Default"
-	
-	KW_DEFINE "Define"
-	KW_REDEFINE "Redefine"
-
 	KW_VERSION "Version"
+	KW_DEFINE "Define"
+
+	KW_RULE "Rule"
+	KW_MODIFIER "Modifier"	
+	KW_DEFAULT "Default"
+	KW_IGNORE "DefaultIgnore"
+	
+	TAG_OVERRIDE "Override"
 ;
 
-%token <ifpp::VariableType>
+%token <ifpp::ExprType>
 	TYPE_NUMBER "Number"
 	TYPE_COLOR "Color"
 	TYPE_FILE "File"
@@ -212,36 +214,15 @@
 
 %token <ifpp::SocketGroup> SOCKETGROUP "socket group"
 
-%token <ifpp::ModifierList> KW_OVERRIDE "Override"
-
 %token <bool> CONST_BOOL "boolean value"
 
 %token <std::string>
-	CON_ITEMLEVEL "ItemLevel"
-	CON_DROPLEVEL "DropLevel"
-	CON_QUALITY "Quality"
-	CON_SOCKETS "Sockets"
-	CON_LINKEDSOCKETS "LinkedSockets"
-	CON_HEIGHT "Height"
-	CON_WIDTH "Width"
-	CON_STACKSIZE "StackSize"
-	CON_GEMLEVEL "GemLevel"
-	CON_MAPTIER "MapTier"
-
-	CON_RARITY "Rarity"
-
-	CON_CLASS "Class"
-	CON_BASETYPE "BaseType"
-	CON_EXPLICIT "HasExplicitMod"
-
-	CON_IDENTIFIED "Identified"
-	CON_CORRUPTED "Corrupted"
-	CON_ELDERITEM "ElderItem"
-	CON_SHAPERITEM "ShaperItem"
-	CON_SHAPEDMAP "ShapedMap"
-
-	CON_SOCKETGROUP "SocketGroup"
-
+	CON_NUMERIC "Condition (Numeric)"
+	CON_RARITY "Condition (Rarity)"
+	CON_LIST "Condition (List)"
+	CON_BOOL "Condition (Boolean)"
+	CON_SOCKETGROUP "Condition (Socket group)"
+	
 	AC_FONTSIZE "SetFontSize"
 
 	AC_BORDERCOLOR "SetBorderColor"
@@ -280,44 +261,32 @@
 %token END 0 "end of file"
 
 
+
 %type <ifpp::Instruction *> instruction
 %type <ifpp::DefinitionBase *> definition
+%type <ifpp::RuleIFPP *> rule
 
-%type <ifpp::CommandList>
-	ruleBody
-	conditions
-	actions
-	actionsNotEmpty
-	rules
-	rulesNotEmpty
+%type <ifpp::CommandList> commands
+%type <ifpp::Style>
+	style
+	actionStyle
 ;
 
 %type <ifpp::Condition *> condition
 %type <ifpp::Action *> action
+%type <ifpp::Modifier *> modifier
 %type <ifpp::DefaultStyle *> defaultStyle
-%type <ifpp::RuleIFPP *> rule
 
-%type <ifpp::Style>
-	style
-	actionStyle
-	exprStyle
-	varStyle
+%type <ifpp::TagList>
+	tags
+	tag
 ;
 
-%type <ifpp::Operator> operator
+%type <ifpp::NameList> exprList
 
-%type <ifpp::ModifierList>
-	modifiers
-	modifier
-;
+%type <ifpp::Color>	exprColor
 
 %type <std::string>
-	conditionNumeric
-	conditionRarity
-	conditionBool
-	conditionNameList
-	conditionSocketGroup
-
 	actionNumber
 	actionColor
 	actionBool
@@ -326,30 +295,18 @@
 	soundId
 
 	exprFile
-	varFile
 ;
+
+%type <ifpp::Operator> operator
 
 %type <int>
-	soundVolume
 	exprNumber
-	exprReallyNumber
-	varNumber
+	soundVolume
 ;
 
-%type <ifpp::Color>
-	exprColor
-	varColor
-;
+%type <bool> exprBool
 
-%type <ifpp::NameList>
-	exprList
-	varList
-;
 
-%type <bool>
-	defineOrRedefine
-	exprBool
-;
 
 %printer { ifpp::print(yyoutput, ifpp::PRINT_IFPP, $$); }
 	<ifpp::Condition *>
@@ -368,7 +325,11 @@
 
 %printer { yyoutput << $$; } <*>
 
+
+
 %%
+
+
 
 %start statements;
 
@@ -391,145 +352,98 @@ KW_VERSION NUMBER[vMajor] CHR_PERIOD NUMBER[vMinor] CHR_PERIOD NUMBER[vBugfix] N
 }
 
 definition:
-  defineOrRedefine VARIABLE TYPE_NUMBER exprNumber NEWLINE
-	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, $1); }
-| defineOrRedefine VARIABLE TYPE_COLOR exprColor NEWLINE
-	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, $1); }
-| defineOrRedefine VARIABLE TYPE_FILE exprFile NEWLINE
-	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, $1); }
-| defineOrRedefine VARIABLE TYPE_LIST exprList NEWLINE
-	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, $1); }
-| defineOrRedefine VARIABLE TYPE_STYLE newlines CHR_LEFTBRACKET NEWLINE style CHR_RIGHTBRACKET NEWLINE
-	{ $$ = magicDefinition(ctx, @$, $2, $3, $style, $1); }
-
-defineOrRedefine:
-  KW_DEFINE { $$ = false; }
-| KW_REDEFINE { $$ = true; }
+  KW_DEFINE VARIABLE TYPE_NUMBER exprNumber NEWLINE
+	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, false); }
+| KW_DEFINE VARIABLE TYPE_COLOR exprColor NEWLINE
+	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, false); }
+| KW_DEFINE VARIABLE TYPE_FILE exprFile NEWLINE
+	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, false); }
+| KW_DEFINE VARIABLE TYPE_LIST exprList NEWLINE
+	{ $$ = magicDefinition(ctx, @$, $2, $3, $4, false); }
+| KW_DEFINE VARIABLE TYPE_STYLE newlines CHR_LEFTBRACKET NEWLINE style CHR_RIGHTBRACKET NEWLINE
+	{ $$ = magicDefinition(ctx, @$, $2, $3, $style, false); }
 
 rule:
-KW_RULE modifiers newlines CHR_LEFTBRACKET NEWLINE ruleBody CHR_RIGHTBRACKET NEWLINE {
-	$$ = new ifpp::RuleIFPP($modifiers, $ruleBody);
+KW_RULE tags newlines CHR_LEFTBRACKET NEWLINE commands CHR_RIGHTBRACKET NEWLINE {
+	$$ = new ifpp::RuleIFPP($commands, $tags);
 }
 
-ruleBody:
-conditions actions rules defaultStyle {
-	$$.insert($$.end(), $1.begin(), $1.end());
-	$$.insert($$.end(), $2.begin(), $2.end());
-	$$.insert($$.end(), $3.begin(), $3.end());
-	if ($4) $$.push_back($4);
+modifier:
+KW_MODIFIER tags newlines CHR_LEFTBRACKET NEWLINE commands CHR_RIGHTBRACKET NEWLINE {
+	$$ = new ifpp::Modifier($commands, $tags);
 }
-
-conditions:
-%empty {}
-| conditions condition { listAppend($$, $1, $2); }
-| conditions NEWLINE { listCopy($$, $1); }
-| conditions error NEWLINE { listCopy($$, $1); }
-
-actions:
-%empty { /* To fix ambiguity when a rule only contains newlines. */ }
-| actionsNotEmpty { listCopy($$, $1); }
-
-actionsNotEmpty:
-action { listAppend($$, $$, $1); }
-| actionStyle { listMerge($$, $$, $1); }
-| actionsNotEmpty action { listAppend($$, $1, $2); }
-| actionsNotEmpty actionStyle { listMerge($$, $1, $2); }
-| actionsNotEmpty NEWLINE { listCopy($$, $1); }
-| actionsNotEmpty error NEWLINE { listCopy($$, $1); }
-
-rules:
-%empty { /* To fix ambiguity when a rule only contains newlines. */ }
-| rulesNotEmpty { $$ = $1; }
-
-rulesNotEmpty:
-rule { listAppend($$, $$, $1); }
-| rulesNotEmpty rule { listAppend($$, $1, $2); }
-| rulesNotEmpty NEWLINE { listCopy($$, $1); }
-| rulesNotEmpty error NEWLINE { listCopy($$, $1); }
 
 defaultStyle:
-%empty { $$ = NULL; }
-| KW_DEFAULT newlines CHR_LEFTBRACKET NEWLINE style CHR_RIGHTBRACKET newlines { $$ = new ifpp::DefaultStyle($style); }
+KW_DEFAULT tags newlines CHR_LEFTBRACKET NEWLINE style CHR_RIGHTBRACKET NEWLINE {
+	$$ = new ifpp::DefaultStyle($style, $tags);
+}
 
-newlines:
-%empty {}
-| newlines NEWLINE {}
+
+
+commands:
+%empty { listNew($$); }
+| commands condition { listAppend($$, $1, $2); }
+| commands action { listAppend($$, $1, $2); }
+| commands actionStyle { listMerge($$, $1, $2); }
+| commands rule { listAppend($$, $1, $2); }
+| commands modifier { listAppend($$, $1, $2); }
+| commands defaultStyle { listAppend($$, $1, $2); }
+| commands tags KW_IGNORE NEWLINE { listAppend($$, $1, new ifpp::Ignore($tags)); }
+| commands NEWLINE { listCopy($$, $1); }
+| commands error NEWLINE { listCopy($$, $1); }
+
+style:
+%empty { listNew($$); }
+| style action { listAppend($$, $1, $2); }
+| style actionStyle { listMerge($$, $1, $2); }
+| style NEWLINE { listCopy($$, $1); }
+| style error NEWLINE { listCopy($$, $1); }
 
 
 
 condition:
-  conditionNumeric[what] operator[op] exprNumber[value] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $op, $value); }
-| conditionNumeric[what] exprNumber[value] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $value, $value); }
-| conditionNumeric[what] exprNumber[from] CHR_DOTDOT exprNumber[to] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $from, $to); }
-| conditionRarity[what] operator[op] CONST_RARITY[value] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $op, $value); }
-| conditionRarity[what] CONST_RARITY[value] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $value, $value); }
-| conditionRarity[what] CONST_RARITY[from] CHR_DOTDOT CONST_RARITY[to] NEWLINE
-	{ $$ = magicInterval(ctx, @$, $what, $from, $to); }
-| conditionBool[what] exprBool[value] NEWLINE
-	{ $$ = new ifpp::ConditionBool($what, $value); }
-| conditionNameList[what] exprList[list] NEWLINE
-	{ $$ = new ifpp::ConditionNameList($what, $list); }
-| conditionSocketGroup[what] SOCKETGROUP[value] NEWLINE
-	{ $$ = new ifpp::ConditionSocketGroup($what, $value); }
-
-conditionNumeric:
-  CON_ITEMLEVEL { $$ = $1; }
-| CON_DROPLEVEL { $$ = $1; }
-| CON_QUALITY { $$ = $1; }
-| CON_SOCKETS { $$ = $1; }
-| CON_LINKEDSOCKETS { $$ = $1; }
-| CON_HEIGHT { $$ = $1; }
-| CON_WIDTH { $$ = $1; }
-| CON_STACKSIZE { $$ = $1; }
-| CON_GEMLEVEL { $$ = $1; }
-| CON_MAPTIER { $$ = $1; }
-
-conditionRarity:
-CON_RARITY { $$ = $1; }
-
-conditionBool:
-  CON_IDENTIFIED { $$ = $1; }
-| CON_CORRUPTED { $$ = $1; }
-| CON_ELDERITEM { $$ = $1; }
-| CON_SHAPERITEM { $$ = $1; }
-| CON_SHAPEDMAP { $$ = $1; }
-
-conditionNameList:
-  CON_CLASS { $$ = $1; }
-| CON_BASETYPE { $$ = $1; }
-| CON_EXPLICIT { $$ = $1; }
-
-conditionSocketGroup:
-CON_SOCKETGROUP { $$ = $1; }
+  tags CON_NUMERIC[what] operator[op] exprNumber[value] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $op, $value, $tags); }
+| tags CON_NUMERIC[what] exprNumber[value] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $value, $value, $tags); }
+| tags CON_NUMERIC[what] exprNumber[from] CHR_DOTDOT exprNumber[to] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $from, $to, $tags); }
+| tags CON_RARITY[what] operator[op] CONST_RARITY[value] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $op, $value, $tags); }
+| tags CON_RARITY[what] CONST_RARITY[value] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $value, $value, $tags); }
+| tags CON_RARITY[what] CONST_RARITY[from] CHR_DOTDOT CONST_RARITY[to] NEWLINE
+	{ $$ = magicInterval(ctx, @$, $what, $from, $to, $tags); }
+| tags CON_LIST[what] exprList[list] NEWLINE
+	{ $$ = new ifpp::ConditionNameList($what, $list, $tags); }
+| tags CON_BOOL[what] exprBool[value] NEWLINE
+	{ $$ = new ifpp::ConditionBool($what, $value, $tags); }
+| tags CON_SOCKETGROUP[what] SOCKETGROUP[value] NEWLINE
+	{ $$ = new ifpp::ConditionSocketGroup($what, $value, $tags); }
 
 
 
 action:
-  modifiers actionNumber[what] exprNumber[value] NEWLINE {
+  tags actionNumber[what] exprNumber[value] NEWLINE {
 	clampValue(ctx, @$, $what, $value, ifpp::getLimit($what, ifpp::MIN), ifpp::getLimit($what, ifpp::MAX));
-	$$ = new ifpp::ActionNumber($modifiers, $what, $value);
+	$$ = new ifpp::ActionNumber($what, $value, $tags);
 }
-| modifiers actionColor[what] exprColor[value] NEWLINE
-	{ $$ = new ifpp::ActionColor($modifiers, $what, $value); }
-| modifiers actionBool[what] exprBool[value] NEWLINE
-	{ $$ = new ifpp::ActionBool($modifiers, $what, $value); }
-| modifiers actionSound[what] soundId soundVolume NEWLINE
-	{ $$ = new ifpp::ActionSound($modifiers, $what, $soundId, $soundVolume); }
-| modifiers AC_CUSTOMSOUND[what] exprFile[file] NEWLINE
-	{ $$ = new ifpp::ActionFile($modifiers, $what, $file); }
-| modifiers AC_MINIMAPICON[what] exprNumber[size] CONST_COLOR[color] CONST_SHAPE[shape] NEWLINE {
+| tags actionColor[what] exprColor[value] NEWLINE
+	{ $$ = new ifpp::ActionColor($what, $value, $tags); }
+| tags actionBool[what] exprBool[value] NEWLINE
+	{ $$ = new ifpp::ActionBool($what, $value, $tags); }
+| tags actionSound[what] soundId soundVolume NEWLINE
+	{ $$ = new ifpp::ActionSound($what, $soundId, $soundVolume, $tags); }
+| tags AC_CUSTOMSOUND[what] exprFile[file] NEWLINE
+	{ $$ = new ifpp::ActionFile($what, $file, $tags); }
+| tags AC_MINIMAPICON[what] exprNumber[size] CONST_COLOR[color] CONST_SHAPE[shape] NEWLINE {
 	clampValue(ctx, @$, $what, $size, ifpp::getLimit($what, ifpp::MIN), ifpp::getLimit($what, ifpp::MAX));
-	$$ = new ifpp::ActionMapIcon($modifiers, $what, $size, $color, $shape);
+	$$ = new ifpp::ActionMapIcon($what, $size, $color, $shape, $tags);
 }
-| modifiers AC_PLAYEFFECT[what] CONST_COLOR[color] NEWLINE
-	{ $$ = new ifpp::ActionEffect($modifiers, $what, $color, ""); }
-| modifiers AC_PLAYEFFECT[what] CONST_COLOR[color] CONST_TEMP[temp] NEWLINE
-	{ $$ = new ifpp::ActionEffect($modifiers, $what, $color, $temp); }
+| tags AC_PLAYEFFECT[what] CONST_COLOR[color] NEWLINE
+	{ $$ = new ifpp::ActionEffect($what, $color, "", $tags); }
+| tags AC_PLAYEFFECT[what] CONST_COLOR[color] CONST_TEMP NEWLINE
+	{ $$ = new ifpp::ActionEffect($what, $color, "Temp", $tags); }
 
 actionNumber:
 AC_FONTSIZE { $$ = $1; }
@@ -548,39 +462,18 @@ actionSound:
 | AC_SOUNDPOSITIONAL { $$ = $1; }
 
 actionStyle:
-modifiers AC_USESTYLE exprStyle[style] NEWLINE {
-	listNew($$);
-	for (const auto & a : $style) {
-		ifpp::Action * aa = static_cast<ifpp::Action *>(a->clone());
-		aa->modifiers |= $modifiers;
-		$$.push_back(aa);
+tags AC_USESTYLE[what] VARIABLE[varName] NEWLINE {
+	if (checkVarUse(ctx, @varName, $varName, ifpp::EXPR_STYLE)) {
+		$$ = ctx.getVarValueStyle($varName);
+	} else {
+		YYERROR;
+	}
+	for (auto a : $$) {
+		a->tags |= $tags;
 	}
 }
 
 
-
-modifiers:
-%empty { $$ = 0; }
-| modifiers modifier { $$ |= $1; }
-
-modifier:
-KW_OVERRIDE { $$ = $1; }
-
-
-
-style:
-actions {
-	for (auto & a : $1) {
-		$$.push_back(static_cast<ifpp::Action *>(a));
-	}
-}
-
-operator:
-  OP_LT	{ $$ = $1; }
-| OP_LE	{ $$ = $1; }
-| OP_EQ	{ $$ = $1; }
-| OP_GE	{ $$ = $1; }
-| OP_GT	{ $$ = $1; }
 
 soundId:
 exprNumber {
@@ -599,21 +492,27 @@ soundVolume:
 
 
 
+tags:
+%empty { $$ = 0; }
+| tags tag { $$ = $1 | $2; }
+
+tag:
+TAG_OVERRIDE { $$ = ifpp::TAG_OVERRIDE; }
+
+
+
 exprNumber:
-varNumber { $$ = $1; }
-| exprReallyNumber { $$ = $1; }
-
-exprReallyNumber:
 NUMBER { $$ = $1; }
-
-exprBool:
-%empty { $$ = true; }
-| CONST_BOOL { $$ = $1; }
+| VARIABLE {
+	if (checkVarUse(ctx, @1, $1, ifpp::EXPR_NUMBER)) {
+		$$ = ctx.getVarValueNumber($1);
+	} else {
+		YYERROR;
+	}
+}
 
 exprColor:
 HEX { $$ = ifpp::Color($1); }
-| varColor { $$ = $1; }
-| varColor CHR_COLON exprNumber { $$ = $1; $$.a = $3; }
 | exprNumber exprNumber exprNumber {
 	clampValue(ctx, @1, "Color value", $1, ifpp::getLimit("Color", ifpp::MIN), ifpp::getLimit("Color", ifpp::MAX));
 	clampValue(ctx, @2, "Color value", $2, ifpp::getLimit("Color", ifpp::MIN), ifpp::getLimit("Color", ifpp::MAX));
@@ -627,64 +526,58 @@ HEX { $$ = ifpp::Color($1); }
 	clampValue(ctx, @4, "Color value", $4, ifpp::getLimit("Color", ifpp::MIN), ifpp::getLimit("Color", ifpp::MAX));
 	$$ = ifpp::Color($1, $2, $3, $4);
 }
-
-exprFile:
-varFile { $$ = $1; }
-| FILENAME { $$ = $1; }
-
-exprList:
-%empty { listNew($$); }
-| exprList NAME	{ listAppend($$, $1, $2); }
-| exprList varList[var] { listMerge($$, $1, $2); }
-
-exprStyle:
-varStyle { $$ = $1; }
-
-
-
-varNumber:
-VARIABLE {
-	if (checkVarUse(ctx, @1, $1, ifpp::VAR_NUMBER)) {
-		$$ = ctx.getVarValueNumber($1);
-	} else {
-		YYERROR;
-	}
-}
-
-varColor:
-VARIABLE {
-	if (checkVarUse(ctx, @1, $1, ifpp::VAR_COLOR)) {
+| VARIABLE {
+	if (checkVarUse(ctx, @1, $1, ifpp::EXPR_COLOR)) {
 		$$ = ctx.getVarValueColor($1);
 	} else {
 		YYERROR;
 	}
 }
+| VARIABLE CHR_COLON exprNumber {
+	if (checkVarUse(ctx, @1, $1, ifpp::EXPR_COLOR)) {
+		$$ = ctx.getVarValueColor($1);
+	} else {
+		YYERROR;
+	}
+	$$.a = $3;
+}
 
-varFile:
-VARIABLE {
-	if (checkVarUse(ctx, @1, $1, ifpp::VAR_FILE)) {
+exprBool:
+%empty { $$ = true; }
+| CONST_BOOL { $$ = $1; }
+
+exprFile:
+FILENAME { $$ = $1; }
+| VARIABLE {
+	if (checkVarUse(ctx, @1, $1, ifpp::EXPR_FILE)) {
 		$$ = ctx.getVarValueFile($1);
 	} else {
 		YYERROR;
 	}
 }
 
-varList:
-VARIABLE {
-	if (checkVarUse(ctx, @1, $1, ifpp::VAR_LIST)) {
-		$$ = ctx.getVarValueList($1);
+exprList:
+%empty { listNew($$); }
+| exprList NAME	{ listAppend($$, $1, $2); }
+| exprList VARIABLE {
+	if (checkVarUse(ctx, @2, $2, ifpp::EXPR_LIST)) {
+		listMerge($$, $1, ctx.getVarValueList($2));
 	} else {
-		listNew($$);
+		listCopy($$, $1);
 	}
 }
 
-varStyle:
-VARIABLE {
-	if (checkVarUse(ctx, @1, $1, ifpp::VAR_STYLE)) {
-		$$ = ctx.getVarValueStyle($1);
-	} else {
-		YYERROR;
-	}
-}
+
+
+operator:
+  OP_LT	{ $$ = $1; }
+| OP_LE	{ $$ = $1; }
+| OP_EQ	{ $$ = $1; }
+| OP_GE	{ $$ = $1; }
+| OP_GT	{ $$ = $1; }
+
+newlines:
+%empty {}
+| newlines NEWLINE {}
 
 %%

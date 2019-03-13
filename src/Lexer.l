@@ -26,7 +26,7 @@ static yy::location loc;
 
 %}
 
-%option noyywrap nounput batch noinput debug
+%option noyywrap nounput batch noinput debug stack
 
 %x comment
 %x nameList
@@ -35,6 +35,7 @@ blank [ \t\r]
 
 idPrefix "$"
 id [[:alpha:][:digit:]_]
+dotdot ".."
 
 hex [0-9a-fA-F]
 socket [rgbwRGBW]
@@ -56,17 +57,20 @@ garbage [^ \t\r\n.><={}/#]
 	return yy::Parser::make_NEWLINE(l);
 }
 
-<INITIAL,nameList>"/*"  BEGIN(comment);
-<comment>[^*\n]*
-<comment>"*"+[^*/\n]*
-<comment>\n				loc.lines();
-<comment>"*"+"/"        BEGIN(INITIAL);
+<INITIAL,nameList>"/*"  yy_push_state(comment);
+
+<comment>{
+	[^*\n]*
+	"*"+[^*/\n]*
+	\n				loc.lines();
+	"*"+"/"        yy_pop_state();
+}
 
 
 "{"				return yy::Parser::make_CHR_LEFTBRACKET(loc);
 "}"				return yy::Parser::make_CHR_RIGHTBRACKET(loc);
-"."				return yy::Parser::make_CHR_PERIOD(loc);
 ".."			return yy::Parser::make_CHR_DOTDOT(loc);
+"."				return yy::Parser::make_CHR_PERIOD(loc);
 ":"				return yy::Parser::make_CHR_COLON(loc);
 
 "<"				return yy::Parser::make_OP_LT(ifpp::OP_LT, loc);
@@ -75,38 +79,43 @@ garbage [^ \t\r\n.><={}/#]
 ">="			return yy::Parser::make_OP_GE(ifpp::OP_GE, loc);
 ">"				return yy::Parser::make_OP_GT(ifpp::OP_GT, loc);
 
-Rule			return yy::Parser::make_KW_RULE(loc);
-Default			return yy::Parser::make_KW_DEFAULT(loc);
-
-Override		return yy::Parser::make_KW_OVERRIDE(ifpp::MOD_OVERRIDE, loc);
-
 Define			return yy::Parser::make_KW_DEFINE(loc);
-Redefine		return yy::Parser::make_KW_REDEFINE(loc);
-
 Version			return yy::Parser::make_KW_VERSION(loc);
 
-ItemLevel		return yy::Parser::make_CON_ITEMLEVEL("ItemLevel", loc);
-DropLevel		return yy::Parser::make_CON_DROPLEVEL("DropLevel", loc);
-Quality			return yy::Parser::make_CON_QUALITY("Quality", loc);
-Sockets			return yy::Parser::make_CON_SOCKETS("Sockets", loc);
-LinkedSockets	return yy::Parser::make_CON_LINKEDSOCKETS("LinkedSockets", loc);
-Height			return yy::Parser::make_CON_HEIGHT("Height", loc);
-Width			return yy::Parser::make_CON_WIDTH("Width", loc);
-StackSize		return yy::Parser::make_CON_STACKSIZE("StackSize", loc);
-GemLevel		return yy::Parser::make_CON_GEMLEVEL("GemLevel", loc);
-MapTier			return yy::Parser::make_CON_MAPTIER("MapTier", loc);
+Rule			return yy::Parser::make_KW_RULE(loc);
+Modifier		return yy::Parser::make_KW_MODIFIER(loc);
+Default			return yy::Parser::make_KW_DEFAULT(loc);
+DefaultIgnore	return yy::Parser::make_KW_IGNORE(loc);
+
+Override		return yy::Parser::make_TAG_OVERRIDE(loc);
+
+ItemLevel		return yy::Parser::make_CON_NUMERIC("ItemLevel", loc);
+DropLevel		return yy::Parser::make_CON_NUMERIC("DropLevel", loc);
+Quality			return yy::Parser::make_CON_NUMERIC("Quality", loc);
+Sockets			return yy::Parser::make_CON_NUMERIC("Sockets", loc);
+LinkedSockets	return yy::Parser::make_CON_NUMERIC("LinkedSockets", loc);
+Height			return yy::Parser::make_CON_NUMERIC("Height", loc);
+Width			return yy::Parser::make_CON_NUMERIC("Width", loc);
+StackSize		return yy::Parser::make_CON_NUMERIC("StackSize", loc);
+GemLevel		return yy::Parser::make_CON_NUMERIC("GemLevel", loc);
+MapTier			return yy::Parser::make_CON_NUMERIC("MapTier", loc);
 
 Rarity			return yy::Parser::make_CON_RARITY("Rarity", loc);
 
-Identified		return yy::Parser::make_CON_IDENTIFIED("Identified", loc);
-Corrupted		return yy::Parser::make_CON_CORRUPTED("Corrupted", loc);
-ElderItem		return yy::Parser::make_CON_ELDERITEM("ElderItem", loc);
-ShaperItem		return yy::Parser::make_CON_SHAPERITEM("ShaperItem", loc);
-ShapedMap		return yy::Parser::make_CON_SHAPEDMAP("ShapedMap", loc);
+Class			BEGIN(nameList); return yy::Parser::make_CON_LIST("Class", loc);
+BaseType		BEGIN(nameList); return yy::Parser::make_CON_LIST("BaseType", loc);
+Prophecy		BEGIN(nameList); return yy::Parser::make_CON_LIST("Prophecy", loc);
+HasExplicitMod	BEGIN(nameList); return yy::Parser::make_CON_LIST("HasExplicitMod", loc);
+HasEnchantment	BEGIN(nameList); return yy::Parser::make_CON_LIST("HasEnchantment", loc);
 
-Class			BEGIN(nameList); return yy::Parser::make_CON_CLASS("Class", loc);
-BaseType		BEGIN(nameList); return yy::Parser::make_CON_BASETYPE("BaseType", loc);
-HasExplicitMod	BEGIN(nameList); return yy::Parser::make_CON_EXPLICIT("HasExplicitMod", loc);
+Identified		return yy::Parser::make_CON_BOOL("Identified", loc);
+Corrupted		return yy::Parser::make_CON_BOOL("Corrupted", loc);
+ElderItem		return yy::Parser::make_CON_BOOL("ElderItem", loc);
+ShaperItem		return yy::Parser::make_CON_BOOL("ShaperItem", loc);
+ShapedMap		return yy::Parser::make_CON_BOOL("ShapedMap", loc);
+FracturedItem	return yy::Parser::make_CON_BOOL("FracturedItem", loc);
+SynthesisedItem	return yy::Parser::make_CON_BOOL("SynthesisedItem", loc);
+AnyEnchantment	return yy::Parser::make_CON_BOOL("AnyEnchantment", loc);
 
 SocketGroup		return yy::Parser::make_CON_SOCKETGROUP("SocketGroup", loc);
 
@@ -126,15 +135,16 @@ MinimapIcon			return yy::Parser::make_AC_MINIMAPICON("MinimapIcon", loc);
 PlayEffect			return yy::Parser::make_AC_PLAYEFFECT("PlayEffect", loc);
 
 DisableDropSound	return yy::Parser::make_AC_DISABLESOUND("DisableDropSound", loc);
+Hide			return yy::Parser::make_AC_HIDDEN("Hidden", loc);
 Hidden			return yy::Parser::make_AC_HIDDEN("Hidden", loc);
 
 UseStyle		return yy::Parser::make_AC_USESTYLE("UseStyle", loc);
 
-Number			return yy::Parser::make_TYPE_NUMBER(ifpp::VAR_NUMBER, loc);
-Color			return yy::Parser::make_TYPE_COLOR(ifpp::VAR_COLOR, loc);
-File			return yy::Parser::make_TYPE_FILE(ifpp::VAR_FILE, loc);
-List			BEGIN(nameList); return yy::Parser::make_TYPE_LIST(ifpp::VAR_LIST, loc);
-Style			return yy::Parser::make_TYPE_STYLE(ifpp::VAR_STYLE, loc);
+Number			return yy::Parser::make_TYPE_NUMBER(ifpp::EXPR_NUMBER, loc);
+Color			return yy::Parser::make_TYPE_COLOR(ifpp::EXPR_COLOR, loc);
+File			return yy::Parser::make_TYPE_FILE(ifpp::EXPR_FILE, loc);
+List			BEGIN(nameList); return yy::Parser::make_TYPE_LIST(ifpp::EXPR_LIST, loc);
+Style			return yy::Parser::make_TYPE_STYLE(ifpp::EXPR_STYLE, loc);
 
 true			return yy::Parser::make_CONST_BOOL(true, loc);
 false			return yy::Parser::make_CONST_BOOL(false, loc);
@@ -144,28 +154,21 @@ Magic	return yy::Parser::make_CONST_RARITY(ifpp::Magic, loc);
 Rare	return yy::Parser::make_CONST_RARITY(ifpp::Rare, loc);
 Unique	return yy::Parser::make_CONST_RARITY(ifpp::Unique, loc);
 
-ItemFilterAlert10	|
-ItemFilterAlert11	|
-ItemFilterAlert12	|
-ItemFilterAlert13	|
-ItemFilterAlert14	|
-ItemFilterAlert15	|
-ItemFilterAlert16	|
-ShAlchemy			|
-ShBlessed			|
-ShChaos				|
-ShDivine			|
-ShExalted			|
-ShFusing			|
-ShGeneral			|
-ShMirror			|
-ShRegal				|
-ShVaal				return yy::Parser::make_CONST_SOUND(yytext, loc);
+ShAlchemy		return yy::Parser::make_CONST_SOUND("ShAlchemy", loc);
+ShBlessed		return yy::Parser::make_CONST_SOUND("ShBlessed", loc);
+ShChaos			return yy::Parser::make_CONST_SOUND("ShChaos", loc);
+ShDivine		return yy::Parser::make_CONST_SOUND("ShDivine", loc);
+ShExalted		return yy::Parser::make_CONST_SOUND("ShExalted", loc);
+ShFusing		return yy::Parser::make_CONST_SOUND("ShFusing", loc);
+ShGeneral		return yy::Parser::make_CONST_SOUND("ShGeneral", loc);
+ShMirror		return yy::Parser::make_CONST_SOUND("ShMirror", loc);
+ShRegal			return yy::Parser::make_CONST_SOUND("ShRegal", loc);
+ShVaal			return yy::Parser::make_CONST_SOUND("ShVaal", loc);
 
-Red		return yy::Parser::make_CONST_COLOR("Red", loc);
-Green	return yy::Parser::make_CONST_COLOR("Green", loc);
 Blue	return yy::Parser::make_CONST_COLOR("Blue", loc);
 Brown	return yy::Parser::make_CONST_COLOR("Brown", loc);
+Green	return yy::Parser::make_CONST_COLOR("Green", loc);
+Red		return yy::Parser::make_CONST_COLOR("Red", loc);
 White	return yy::Parser::make_CONST_COLOR("White", loc);
 Yellow	return yy::Parser::make_CONST_COLOR("Yellow", loc);
 
@@ -193,7 +196,7 @@ x{hex}+				return yy::Parser::make_HEX(yytext + 1, loc);
 {socket}+			return yy::Parser::make_SOCKETGROUP(std::string(yytext), loc);
 \"[^"\r\n]*\"		return yy::Parser::make_FILENAME(yytext, loc);
 
-<nameList>{blank}+  
+<nameList>{blank}+
 <nameList>\n		loc.lines(); BEGIN(INITIAL); return yy::Parser::make_NEWLINE(loc);
 <nameList>{idPrefix}{id}+	return yy::Parser::make_VARIABLE(yytext, loc);
 
@@ -210,9 +213,9 @@ x{hex}+				return yy::Parser::make_HEX(yytext + 1, loc);
 	static bool first = true;
 	if (first) {
 		first = false;
-		return yy::Parser::make_NEWLINE(loc);		
+		return yy::Parser::make_NEWLINE(loc);
 	}
-	return yy::Parser::make_END(loc);	
+	return yy::Parser::make_END(loc);
 }
 
 %%
