@@ -19,24 +19,22 @@ extern const int IFPP_VERSION_PATCH;
 namespace ifpp {
 	
 void Context::reset() {
-	for (const auto stm : filter) delete stm;
+	for (const auto ins : filter) delete ins;
 	filter.clear();
 	
 	countIns = 0;
 	countDef = 0;
-	countRule = 0;
+	countBlock = 0;
 	
 	varNumber.clear();
 	varColor.clear();
 	varFile.clear();
 	varList.clear();
 	
-	for (const auto & s : varStyle) {
-		for (const auto a : s.second) {
-			delete a;
-		}
+	for (const auto & var : varMacro) {
+		for (const auto c : var.second) delete c;
 	}
-	varStyle.clear();
+	varMacro.clear();
 }
 
 void Context::parse() {
@@ -61,11 +59,17 @@ void Context::parse() {
 	if (result != 0) throw InternalError("Parser finished with an error!", __FILE__, __LINE__);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 bool Context::versionCheck(int vMajor, int vMinor, int vPatch) const {
+	return true;
+	/*
 	return vMajor == IFPP_VERSION_MAJOR
 		&& vMinor == IFPP_VERSION_MINOR
 		&& vPatch == IFPP_VERSION_PATCH;
+	*/
 }
+#pragma GCC diagnostic pop
 
 void Context::defineVariable(const std::string & name, ExprType type, int value) {
 	if (type != EXPR_NUMBER) throw InternalError("Defining a variable with the wrong type! Expected EXPR_NUMBER.", __FILE__, __LINE__);
@@ -87,9 +91,9 @@ void Context::defineVariable(const std::string & name, ExprType type, const Name
 	varList[name] = value;
 }
 
-void Context::defineVariable(const std::string & name, ExprType type, const Style & value) {
-	if (type != EXPR_STYLE) throw InternalError("Defining a variable with the wrong type! Expected EXPR_STYLE.", __FILE__, __LINE__);
-	varStyle[name] = value;
+void Context::defineVariable(const std::string & name, ExprType type, const CommandList & value) {
+	if (type != EXPR_MACRO) throw InternalError("Defining a variable with the wrong type! Expected EXPR_MACRO.", __FILE__, __LINE__);
+	varMacro[name] = value;
 }
 
 void Context::undefineVariable(const std::string & name) {
@@ -98,9 +102,9 @@ void Context::undefineVariable(const std::string & name) {
 		case EXPR_COLOR: varColor.erase(name); break;
 		case EXPR_FILE: varFile.erase(name); break;
 		case EXPR_LIST: varList.erase(name); break;
-		case EXPR_STYLE:
-			for (const auto & a : varStyle[name]) delete a;
-			varStyle.erase(name);
+		case EXPR_MACRO:
+			for (const auto c : varMacro[name]) delete c;
+			varMacro.erase(name);
 			break;
 		case EXPR_UNDEFINED: break;
 		default: throw UnhandledCase("Variable type", __FILE__, __LINE__);
@@ -112,7 +116,7 @@ ExprType Context::getVarType(const std::string & name) const {
 	if (varColor.count(name) > 0) return EXPR_COLOR;
 	if (varFile.count(name) > 0) return EXPR_FILE;
 	if (varList.count(name) > 0) return EXPR_LIST;
-	if (varStyle.count(name) > 0) return EXPR_STYLE;
+	if (varMacro.count(name) > 0) return EXPR_MACRO;
 	return EXPR_UNDEFINED;
 }
 
@@ -134,18 +138,17 @@ const NameList & Context::getVarValueList(const std::string & name) const {
 	return varList.at(name);
 }
 
-const Style & Context::getVarValueStyle(const std::string & name) const {
-	return varStyle.at(name);
+const CommandList & Context::getVarValueMacro(const std::string & name) const {
+	return varMacro.at(name);
 }
 
-void Context::addStatement(Statement * stm) {
-	switch (stm->stmType) {
-		case STM_INSTRUCTION: ++countIns; break;
-		case STM_DEFINITION: ++countDef; break;
-		case STM_RULE: ++countRule; break;
-		default: throw UnhandledCase("Statement type", __FILE__, __LINE__);
+void Context::addInstruction(Instruction * ins) {
+	switch (ins->insType) {
+		case INS_DEFINITION: ++countDef; break;
+		case INS_BLOCK: ++countBlock; break;
+		default: ++countIns; break;
 	}
-	filter.push_back(stm);
+	filter.push_back(ins);
 }
 
 std::ostream & Context::warningAt(const yy::location & l) {
@@ -159,6 +162,5 @@ std::ostream & Context::errorAt(const yy::location & l) {
 std::ostream & Context::criticalAt(const yy::location & l) {
 	return log.critical() << "Line " << l << ": ";
 }
-
 
 }

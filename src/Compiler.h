@@ -9,13 +9,11 @@ namespace ifpp {
 	
 class Compiler {
 public:
-	Compiler(Logger & l, bool wp, std::ostream & ps) : log(l), writePartial(wp), partialStream(ps) {};
-	void Compile(const FilterIFPP & inFilter, FilterNative & outFilter);
+	Compiler(Logger & l) : log(l) {};
+	void Compile(FilterNative & outFilter, const FilterIFPP & inFilter);
 	
 private:
 	Logger & log;
-	bool writePartial;
-	std::ostream & partialStream;
 };
 
 }

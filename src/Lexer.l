@@ -1,3 +1,6 @@
+%option batch stack
+%option noyywrap noinput
+
 %{
 
 #include <cerrno>
@@ -5,9 +8,8 @@
 #include <cstdlib>
 #include <string>
 
-#include "Parser.h"
-
 #include "Types.h"
+#include "Parser.h"
 #include "Context.h"
 
 #define YY_DECL yy::Parser::symbol_type yylex(ifpp::Context & ctx)
@@ -24,9 +26,16 @@ static yy::location loc;
 # undef yywrap
 # define yywrap() 1
 
-%}
+static void yyunput ( int c, char *buf_ptr  );
 
-%option noyywrap nounput batch noinput debug stack
+void unputs(const char * s) {
+	if (!*s) return;
+	const char * p = s;
+	while (*p) ++p;
+	do { unput(*--p); } while (p != s);
+}
+
+%}
 
 %x comment
 %x nameList
@@ -45,68 +54,66 @@ garbage [^ \t\r\n.><={}/#]
 
 %%
 
-{blank}*\n		loc.lines(); return yy::Parser::make_NEWLINE(loc);
+{blank}*\n		loc.lines(); return yy::Parser::make_NEWLINE("\n", loc);
 {blank}+
 
-<INITIAL,nameList>{blank}*{comStart}[^\n]*		BEGIN(INITIAL);
-<INITIAL,nameList>{blank}*{comStart}[^\n]*\n {
-	// For error reporting, the \n should still be a part of the last line.
-	yy::location l = loc;
-	loc.lines();
-	BEGIN(INITIAL);
-	return yy::Parser::make_NEWLINE(l);
-}
+<INITIAL,nameList>{blank}*{comStart}[^\n]*
 
 <INITIAL,nameList>"/*"  yy_push_state(comment);
-
 <comment>{
 	[^*\n]*
 	"*"+[^*/\n]*
-	\n				loc.lines();
-	"*"+"/"        yy_pop_state();
+	\n			loc.lines();
+	"*/"        yy_pop_state();
 }
 
 
-"{"				return yy::Parser::make_CHR_LEFTBRACKET(loc);
-"}"				return yy::Parser::make_CHR_RIGHTBRACKET(loc);
-".."			return yy::Parser::make_CHR_DOTDOT(loc);
-"."				return yy::Parser::make_CHR_PERIOD(loc);
-":"				return yy::Parser::make_CHR_COLON(loc);
+"{"				unputs("@{@\n"); return yy::Parser::make_NEWLINE("\n", loc);
+"}"				unputs("@}@\n"); return yy::Parser::make_NEWLINE("\n", loc);
+"@{"			return yy::Parser::make_CHR_LEFTBRACKET("{", loc);
+"@}"			return yy::Parser::make_CHR_RIGHTBRACKET("}", loc);
+"@\n"			return yy::Parser::make_NEWLINE("\n", loc);
 
-"<"				return yy::Parser::make_OP_LT(ifpp::OP_LT, loc);
-"<="			return yy::Parser::make_OP_LE(ifpp::OP_LE, loc);
-"="				return yy::Parser::make_OP_EQ(ifpp::OP_EQ, loc);
-">="			return yy::Parser::make_OP_GE(ifpp::OP_GE, loc);
-">"				return yy::Parser::make_OP_GT(ifpp::OP_GT, loc);
+".."			return yy::Parser::make_CHR_DOTDOT("..", loc);
+"."				return yy::Parser::make_CHR_PERIOD(".", loc);
+":"				return yy::Parser::make_CHR_COLON(":", loc);
 
-Define			return yy::Parser::make_KW_DEFINE(loc);
-Version			return yy::Parser::make_KW_VERSION(loc);
+"<"				return yy::Parser::make_OPERATOR(ifpp::OP_LT, loc);
+"<="			return yy::Parser::make_OPERATOR(ifpp::OP_LE, loc);
+"="				return yy::Parser::make_OPERATOR(ifpp::OP_EQ, loc);
+">="			return yy::Parser::make_OPERATOR(ifpp::OP_GE, loc);
+">"				return yy::Parser::make_OPERATOR(ifpp::OP_GT, loc);
 
-Rule			return yy::Parser::make_KW_RULE(loc);
-Modifier		return yy::Parser::make_KW_MODIFIER(loc);
-Default			return yy::Parser::make_KW_DEFAULT(loc);
-DefaultIgnore	return yy::Parser::make_KW_IGNORE(loc);
+Define			return yy::Parser::make_KW_DEFINE("Define", loc);
 
-Override		return yy::Parser::make_TAG_OVERRIDE(loc);
+Rule			return yy::Parser::make_KW_RULE("Rule", loc);
+Modifier		return yy::Parser::make_KW_MODIFIER("Modifier", loc);
+Group			return yy::Parser::make_KW_GROUP("Group", loc);
+Default			return yy::Parser::make_KW_DEFAULT("Default", loc);
 
-ItemLevel		return yy::Parser::make_CON_NUMERIC("ItemLevel", loc);
-DropLevel		return yy::Parser::make_CON_NUMERIC("DropLevel", loc);
-Quality			return yy::Parser::make_CON_NUMERIC("Quality", loc);
-Sockets			return yy::Parser::make_CON_NUMERIC("Sockets", loc);
-LinkedSockets	return yy::Parser::make_CON_NUMERIC("LinkedSockets", loc);
-Height			return yy::Parser::make_CON_NUMERIC("Height", loc);
-Width			return yy::Parser::make_CON_NUMERIC("Width", loc);
-StackSize		return yy::Parser::make_CON_NUMERIC("StackSize", loc);
-GemLevel		return yy::Parser::make_CON_NUMERIC("GemLevel", loc);
-MapTier			return yy::Parser::make_CON_NUMERIC("MapTier", loc);
+Override		return yy::Parser::make_TAG(ifpp::TAG_OVERRIDE, loc);
+Final			return yy::Parser::make_TAG(ifpp::TAG_FINAL, loc);
+NoDefault		return yy::Parser::make_TAG(ifpp::TAG_NODEFAULT, loc);
+Required 		return yy::Parser::make_TAG(ifpp::TAG_REQUIRED, loc);
+
+ItemLevel		return yy::Parser::make_CON_NUMBER("ItemLevel", loc);
+DropLevel		return yy::Parser::make_CON_NUMBER("DropLevel", loc);
+Quality			return yy::Parser::make_CON_NUMBER("Quality", loc);
+Sockets			return yy::Parser::make_CON_NUMBER("Sockets", loc);
+LinkedSockets	return yy::Parser::make_CON_NUMBER("LinkedSockets", loc);
+Height			return yy::Parser::make_CON_NUMBER("Height", loc);
+Width			return yy::Parser::make_CON_NUMBER("Width", loc);
+StackSize		return yy::Parser::make_CON_NUMBER("StackSize", loc);
+GemLevel		return yy::Parser::make_CON_NUMBER("GemLevel", loc);
+MapTier			return yy::Parser::make_CON_NUMBER("MapTier", loc);
 
 Rarity			return yy::Parser::make_CON_RARITY("Rarity", loc);
 
-Class			BEGIN(nameList); return yy::Parser::make_CON_LIST("Class", loc);
-BaseType		BEGIN(nameList); return yy::Parser::make_CON_LIST("BaseType", loc);
-Prophecy		BEGIN(nameList); return yy::Parser::make_CON_LIST("Prophecy", loc);
-HasExplicitMod	BEGIN(nameList); return yy::Parser::make_CON_LIST("HasExplicitMod", loc);
-HasEnchantment	BEGIN(nameList); return yy::Parser::make_CON_LIST("HasEnchantment", loc);
+Class			yy_push_state(nameList); return yy::Parser::make_CON_LIST("Class", loc);
+BaseType		yy_push_state(nameList); return yy::Parser::make_CON_LIST("BaseType", loc);
+Prophecy		yy_push_state(nameList); return yy::Parser::make_CON_LIST("Prophecy", loc);
+HasExplicitMod	yy_push_state(nameList); return yy::Parser::make_CON_LIST("HasExplicitMod", loc);
+HasEnchantment	yy_push_state(nameList); return yy::Parser::make_CON_LIST("HasEnchantment", loc);
 
 Identified		return yy::Parser::make_CON_BOOL("Identified", loc);
 Corrupted		return yy::Parser::make_CON_BOOL("Corrupted", loc);
@@ -119,32 +126,31 @@ AnyEnchantment	return yy::Parser::make_CON_BOOL("AnyEnchantment", loc);
 
 SocketGroup		return yy::Parser::make_CON_SOCKETGROUP("SocketGroup", loc);
 
-SetFontSize		return yy::Parser::make_AC_FONTSIZE("SetFontSize", loc);
-SetTextSize		return yy::Parser::make_AC_FONTSIZE("SetFontSize", loc);
+SetFontSize		return yy::Parser::make_AC_NUMBER("SetFontSize", loc);
+SetTextSize		return yy::Parser::make_AC_NUMBER("SetFontSize", loc);
 
-SetBorderColor	return yy::Parser::make_AC_BORDERCOLOR("SetBorderColor", loc);
-SetTextColor	return yy::Parser::make_AC_TEXTCOLOR("SetTextColor", loc);
-SetFontColor	return yy::Parser::make_AC_TEXTCOLOR("SetTextColor", loc);
-SetBackgroundColor	return yy::Parser::make_AC_BGCOLOR("SetBackgroundColor", loc);
+SetBorderColor	return yy::Parser::make_AC_COLOR("SetBorderColor", loc);
+SetTextColor	return yy::Parser::make_AC_COLOR("SetTextColor", loc);
+SetFontColor	return yy::Parser::make_AC_COLOR("SetTextColor", loc);
+SetBackgroundColor	return yy::Parser::make_AC_COLOR("SetBackgroundColor", loc);
 
 PlayAlertSound				return yy::Parser::make_AC_SOUND("PlayAlertSound", loc);
-PlayAlertSoundPositional	return yy::Parser::make_AC_SOUNDPOSITIONAL("PlayAlertSoundPositional", loc);
+PlayAlertSoundPositional	return yy::Parser::make_AC_SOUND("PlayAlertSoundPositional", loc);
 
 CustomAlertSound	return yy::Parser::make_AC_CUSTOMSOUND("CustomAlertSound", loc);
 MinimapIcon			return yy::Parser::make_AC_MINIMAPICON("MinimapIcon", loc);
 PlayEffect			return yy::Parser::make_AC_PLAYEFFECT("PlayEffect", loc);
 
-DisableDropSound	return yy::Parser::make_AC_DISABLESOUND("DisableDropSound", loc);
-Hide			return yy::Parser::make_AC_HIDDEN("Hidden", loc);
-Hidden			return yy::Parser::make_AC_HIDDEN("Hidden", loc);
+DisableDropSound	return yy::Parser::make_AC_BOOL("DisableDropSound", loc);
+Hidden			return yy::Parser::make_AC_BOOL("Hidden", loc);
 
-UseStyle		return yy::Parser::make_AC_USESTYLE("UseStyle", loc);
+UseMacro		return yy::Parser::make_AC_USEMACRO("UseMacro", loc);
 
 Number			return yy::Parser::make_TYPE_NUMBER(ifpp::EXPR_NUMBER, loc);
 Color			return yy::Parser::make_TYPE_COLOR(ifpp::EXPR_COLOR, loc);
 File			return yy::Parser::make_TYPE_FILE(ifpp::EXPR_FILE, loc);
-List			BEGIN(nameList); return yy::Parser::make_TYPE_LIST(ifpp::EXPR_LIST, loc);
-Style			return yy::Parser::make_TYPE_STYLE(ifpp::EXPR_STYLE, loc);
+List			yy_push_state(nameList); return yy::Parser::make_TYPE_LIST(ifpp::EXPR_LIST, loc);
+Macro			return yy::Parser::make_TYPE_MACRO(ifpp::EXPR_MACRO, loc);
 
 true			return yy::Parser::make_CONST_BOOL(true, loc);
 false			return yy::Parser::make_CONST_BOOL(false, loc);
@@ -196,26 +202,21 @@ x{hex}+				return yy::Parser::make_HEX(yytext + 1, loc);
 {socket}+			return yy::Parser::make_SOCKETGROUP(std::string(yytext), loc);
 \"[^"\r\n]*\"		return yy::Parser::make_FILENAME(yytext, loc);
 
-<nameList>{blank}+
-<nameList>\n		loc.lines(); BEGIN(INITIAL); return yy::Parser::make_NEWLINE(loc);
-<nameList>{idPrefix}{id}+	return yy::Parser::make_VARIABLE(yytext, loc);
 
-<nameList>\"[^"\r\n]*\" {
-	std::string s(yytext + 1, yyleng - 2);
-	return yy::Parser::make_NAME(s, loc);
+<nameList>{
+	{blank}+
+	\\{blank}*\n	loc.lines();
+	\n			loc.lines(); yy_pop_state(); return yy::Parser::make_NEWLINE("\n", loc);
+	"}"			unputs("@}@\n"); yy_pop_state(); return yy::Parser::make_NEWLINE("\n", loc);
+	\"[^"\r\n]*\" 	{ std::string s(yytext + 1, yyleng - 2);
+						return yy::Parser::make_NAME(s, loc); }
+	{idPrefix}{id}+		return yy::Parser::make_VARIABLE(yytext, loc);
+	[^\}\\ \t\r\n"]+	return yy::Parser::make_NAME(yytext, loc);
 }
-
-<nameList>[^ \r\n"]+	return yy::Parser::make_NAME(yytext, loc);
 
 {garbage}*		ctx.criticalAt(loc) << "String \"" << yytext << "\" not recognized!" << std::endl;
 
-<<EOF>> {
-	static bool first = true;
-	if (first) {
-		first = false;
-		return yy::Parser::make_NEWLINE(loc);
-	}
-	return yy::Parser::make_END(loc);
-}
+<<EOF>>	return yy::Parser::make_END(loc);
 
 %%
+

@@ -20,7 +20,7 @@
 #include <shlobj.h>
 
 extern const int IFPP_VERSION_MAJOR = 2;
-extern const int IFPP_VERSION_MINOR = 0;
+extern const int IFPP_VERSION_MINOR = 1;
 extern const int IFPP_VERSION_PATCH = 0;
 const char * POE_VERSION = "3.6";
 
@@ -119,7 +119,7 @@ int main(int argc, char ** argv) {
 		log.message() << "Parsing finished." << std::endl;
 		log.message() << "\t" << ctx.countDef << " definitions" << std::endl;
 		log.message() << "\t" << ctx.countIns << " instructions" << std::endl;
-		log.message() << "\t" << ctx.countRule << " top-level rules" << std::endl << std::endl;
+		log.message() << "\t" << ctx.countBlock << " top-level blocks" << std::endl << std::endl;
 /*		
 		if (dPartial) {
 			std::ofstream parsedStream(baseName + ".parsed.ifpp", std::ios_base::out);
@@ -141,11 +141,11 @@ int main(int argc, char ** argv) {
 		std::ofstream partialStream;
 		if (dPartial) partialStream.open(baseName + ".partial.ifpp", std::ios_base::out);
 */	
-		ifpp::Compiler c(log, false, std::cerr);
+		ifpp::Compiler c(log);
 		
 		log.message() << "Compiler initialized." << std::endl;
 		log.message() << "Compiling filter..." << std::endl;
-		c.Compile(inFilter, outFilter);
+		c.Compile(outFilter, inFilter);
 		log.message() << "Compiling done." << std::endl;
 		log.message() << "\tGenerated " << outFilter.size() << " native rules." << std::endl << std::endl;
 		
@@ -157,7 +157,7 @@ int main(int argc, char ** argv) {
 	
 		log.message() << "Writing native filter to \"" << outFile << "\"..." << std::endl;
 		std::ofstream outStream(outFile, std::ios_base::out);
-		ifpp::print(outStream, ifpp::PRINT_NATIVE, outFilter);
+		ifpp::print(outStream, outFilter);
 		outStream.close();
 
 		// Copy the filter to the Path of Exile folder under My Documents.		
@@ -181,7 +181,7 @@ int main(int argc, char ** argv) {
 			
 			log.message() << "Writing native filter to \"" << docFile << "\"..." << std::endl;
 			std::ofstream docStream(docFile, std::ios_base::out);
-			ifpp::print(docStream, ifpp::PRINT_NATIVE, outFilter);
+			ifpp::print(docStream, outFilter);
 			docStream.close();
 		}
 		

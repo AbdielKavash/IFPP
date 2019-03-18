@@ -2,146 +2,168 @@
 
 namespace ifpp {
 	
-static RuleNative * ModifyRule(RuleNative * ruleOld, const Modifier * mod) {
-	RuleNative * ruleNew = ruleOld->clone();
-	for (const auto c : mod->commands) {
-		switch (c->comType) {
-			case COM_CONDITION:
-				ruleNew->addCondition(static_cast<Condition *>(c));
-				break;
-				
-			case COM_ACTION:
-				ruleNew->addAction(static_cast<Action *>(c));
-				break;
-				
-			case COM_RULE:
-				throw InternalError("Rules inside modifiers are not implemented yet.", __FILE__, __LINE__);
-				
-			case COM_MODIFIER:
-				throw InternalError("Nested modifiers are not implemented yet.", __FILE__, __LINE__);
-				
-			case COM_DEFAULT:
-			case COM_IGNORE:
-				throw InternalError("Deafult styles inside modifiers are not implemented yet.", __FILE__, __LINE__);
-				
-			default:
-				throw UnhandledCase("Command type", __FILE__, __LINE__);					
-		}
-		if (ruleNew->useless) break;
-	}
-	return ruleNew;
-}
-	
-/*
-Modifies the entire input filter by adding the given modifier to all the rules.
-*/
-static void AddModifier(FilterNative & filter, const Modifier * mod) {
-	FilterNative tempFilter;
-	tempFilter.swap(filter);
-	
-	// Modify each rule by the modifier.
-	for (auto ruleOld : tempFilter) {
-		RuleNative * ruleNew = ModifyRule(ruleOld, mod);
-		
-		if (!ruleNew->useless) filter.push_back(ruleNew);
-		else delete ruleNew;
-		
-		if (!ruleOld->useless) filter.push_back(ruleOld);
-		else delete ruleOld;
-	}
-}
-
 /*
 Appends all rules from the second filter to the first. Clears the second filter.
 Currently there is no optimization being done between different sections - this could be added?
 */
-void AppendFilter(FilterNative & first, FilterNative & second) {
+static void AppendFilter(FilterNative & first, const FilterNative & second) {
 	first.reserve(first.size() + second.size());
 	first.insert(first.end(), second.begin(), second.end());
 }
 
 /*
+TODO: crop the old rule by the conditions in modifier
+to optimize situations where the old rule does not match anything after all mods.
+*/
+static RuleNative * ModifyRule(RuleNative * ruleOld, const RuleNative * modifier) {
+	auto * ruleNew = ruleOld->clone();
+	for (const auto c : modifier->conditions) {
+		ruleNew->addCondition(c.second);
+		if (ruleNew->useless) break;
+	}
+	
+	if (!ruleNew->useless) {
+		for (const auto a : modifier->actions) {
+			ruleNew->addAction(a.second);
+		}
+		if (RuleSubset(ruleOld, ruleNew)) ruleOld->useless = true;
+	}
+
+	return ruleNew;
+}
+
+/*
+Appends a rule modified by the modifier to the filter.
+*/
+static void ModifyRule(FilterNative & outFilter, RuleNative * ruleOld, const FilterNative & modifier) {
+	for (const auto modOld : modifier) {
+		const auto ruleNew = ModifyRule(ruleOld, modOld);
+		
+		if (!ruleNew->useless) outFilter.push_back(ruleNew);
+		else delete ruleNew;
+	}
+}
+
+/*
+Modifies the first filter by the second (cartesian product).
+Few optimizations are preformed right now, TODO.
+*/
+static void ModifyFilter(FilterNative & inFilter, const FilterNative & modifier, bool required) {
+	if (inFilter.empty()) {
+		AppendFilter(inFilter, modifier);
+		return;
+	}
+	
+	FilterNative outFilter;
+	
+	for (auto ruleOld : inFilter) {
+		ModifyRule(outFilter, ruleOld, modifier);
+		
+		if (!required && !ruleOld->useless) outFilter.push_back(ruleOld);
+		else delete ruleOld;
+	}
+	
+	inFilter.swap(outFilter);
+}
+
+/*
 Compiles a single top-level IFPP rule and appends the native rules to a filter.
 */
-void CompileRule(const RuleIFPP * rule, FilterNative & outFilter, const RuleNative * baseRule) {
-	FilterNative tempFilter;
-	RuleNative * base = baseRule->clone();
+static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const RuleNative * baseRule = NULL) {
+	RuleNative * base = baseRule ? baseRule->clone() : new RuleNative();
+	//bool hasConditions = false;
+	bool hasDefault = true;
 	
-	for (const auto c : rule->commands) {
+	for (const auto c : inBlock->commands) {
 		switch (c->comType) {
 			case COM_CONDITION:
 				base->addCondition(static_cast<Condition *>(c));
+				//hasConditions = true;
 				break;
-				
+
 			case COM_ACTION:
 				base->addAction(static_cast<Action *>(c));
 				break;
+
+			case COM_BLOCK: {
+				const auto block = static_cast<Block *>(c);
+				FilterNative blockFilter;
+				CompileBlock(blockFilter, block, base);
 				
-			case COM_RULE:
-				CompileRule(static_cast<RuleIFPP *>(c), tempFilter, base);
-				break;
-				
-			case COM_MODIFIER: {
-				AddModifier(tempFilter, static_cast<Modifier *>(c));
-				RuleNative * ruleNew = ModifyRule(base, static_cast<Modifier *>(c));
-				if (!ruleNew->useless) tempFilter.push_back(ruleNew);
-				else delete ruleNew;
-				break;
-			}
-				
-			case COM_DEFAULT:
-				// TODO: This should only do stuff for non-intersecting conditions.
-				for (const auto a : static_cast<DefaultStyle *>(c)->style) {
-					base->addAction(a);
+				switch (block->blockType) {
+					case BLOCK_RULE:
+					case BLOCK_GROUP:
+						AppendFilter(outFilter, blockFilter);
+						break;
+						
+					case BLOCK_MODIFIER:
+						ModifyFilter(outFilter, blockFilter, block->hasTag(TAG_REQUIRED));
+						if (block->hasTag(TAG_REQUIRED)) hasDefault = false;
+						break;
+
+					case BLOCK_DEFAULT:
+						AppendFilter(outFilter, blockFilter);
+						hasDefault = false;
+						break;
+
+					default:
+						throw UnhandledCase("Block type", __FILE__, __LINE__);
 				}
 				break;
-				
-			case COM_IGNORE:
-				// Somewhat hacky but w/e.
-				base->useless = true;
-				break;
-				
+			}
+
 			default:
 				throw UnhandledCase("Command type", __FILE__, __LINE__);
 		}
 	}
-	
-	if (!base->useless) {
-		tempFilter.push_back(base);
-	} else {
+
+	if (inBlock->blockType == BLOCK_GROUP
+		|| inBlock->hasTag(TAG_NODEFAULT)
+		//|| (inBlock->hasTag(TAG_REQUIRED) && !hasConditions)
+		|| !hasDefault
+		|| base->useless
+		|| base->actions.empty()) {
+		// If any of the conditions above is true, skip the default rule.
 		delete base;
+	} else {
+		outFilter.push_back(base);		
 	}
-	
-	AppendFilter(outFilter, tempFilter);
 }
 
 /*
 Compiles an IFPP filter into a native filter.
 */
-void Compiler::Compile(const FilterIFPP & inFilter, FilterNative & outFilter) {
+void Compiler::Compile(FilterNative & outFilter, const FilterIFPP & inFilter) {
+	for (const auto r : outFilter) delete r;
 	outFilter.clear();
-	RuleNative * blank = new RuleNative();
 
-	for (auto statement : inFilter) {
-		switch (statement->stmType) {
-			case STM_DEFINITION:
+	for (const auto ins : inFilter) {
+		switch (ins->insType) {
+			case INS_DEFINITION:
 				// Nothing to do, variables are handled in the parser.
 				break;
 
-			case STM_INSTRUCTION:
-				// Version is handled in the parser. // TODO
+			case INS_BLOCK: {
+				const auto block = static_cast<Block *>(ins);
+				switch (block->blockType) {
+					case BLOCK_RULE:
+					case BLOCK_GROUP: {
+						FilterNative blockFilter;
+						CompileBlock(blockFilter, block);
+						AppendFilter(outFilter, blockFilter);
+						break;
+					}
+						
+					default:
+						throw InternalError("Attempting to compile an invalid top-level block!", __FILE__, __LINE__);
+				}
 				break;
+			}
 
-			case STM_RULE:
-				CompileRule(static_cast<RuleIFPP *>(statement), outFilter, blank);
-				break;
-			
 			default:
-				throw UnhandledCase("Statement type", __FILE__, __LINE__);
+				throw UnhandledCase("Instruction type", __FILE__, __LINE__);
 		}
 	}
-	
-	delete blank;
 }
 
 }
