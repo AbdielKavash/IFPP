@@ -214,7 +214,7 @@ void RuleNative::addCondition(const Condition * c) {
 			}
 
 			// Check if we need more than 6 different sockets.
-			if (r + g + b + w > getLimit("SocketGroup", MAX)) useless = true;
+			if (r + g + b + w > getLimit("LinkedSockets", MAX)) useless = true;
 
 			// Add the new condition.
 			if (add) {
@@ -262,6 +262,17 @@ If the action has the Override tag, replaces an existing action with the same na
 Otherwise the old action is preserved.
 */
 void RuleNative::addAction(const Action * a) {
+	if (a->what == "Remove") {
+		// Remove an action of the specified type - unless it is final.
+		// The Remove action itself is not kept by the rule.
+		auto it = actions.find(static_cast<const ActionRemove *>(a)->arg1);
+		if (it != actions.end() && !it->second->hasTag(TAG_FINAL)) {
+			delete it->second;
+			actions.erase(it);
+		}
+		return;
+	}
+	
 	// Possibly override other actions of the same type.
 	auto it = actions.find(a->what);
 	if (it != actions.end() && a->hasTag(TAG_OVERRIDE)) {

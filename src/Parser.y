@@ -173,10 +173,11 @@
 	KW_DEFINE "Define"
 	
 	KW_RULE "Rule"
+	KW_CONDITIONGROUP "ConditionGroup"
 	KW_MODIFIER "Modifier"
 	KW_GROUP "Group"	
 	KW_DEFAULT "Default"
-
+	
 	CON_NUMBER "Condition (Number)"
 	CON_RARITY "Condition (Rarity)"
 	CON_LIST "Condition (List)"
@@ -190,6 +191,7 @@
 	AC_CUSTOMSOUND "Action (Custom sound)"
 	AC_MINIMAPICON "Action (Minimap icon)"
 	AC_PLAYEFFECT "Action (Play effect)"
+	AC_REMOVE "Action (Remove)"
 
 	AC_USEMACRO "Action (Use macro)"
 
@@ -236,6 +238,7 @@
 
 %type <ifpp::Block *>
 	rule
+	conditionGroup
 	modifier
 	group
 	defaultRule
@@ -245,6 +248,7 @@
 	commandsAny
 	commandsGroup
 	commandsDefault
+	commandsConditions
 	actionMacro
 ;
 
@@ -255,6 +259,7 @@
 %type <ifpp::Color>	exprColor
 
 %type <std::string>
+	actionName
 	soundId
 	exprFile
 ;
@@ -310,6 +315,11 @@ tags KW_RULE[what] newlines CHR_LEFTBRACKET NEWLINE commandsAny CHR_RIGHTBRACKET
 	$$ = new ifpp::Block(ifpp::BLOCK_RULE, $what, $commandsAny, $tags);
 }
 
+conditionGroup:
+tags KW_CONDITIONGROUP[what] newlines CHR_LEFTBRACKET NEWLINE commandsConditions CHR_RIGHTBRACKET NEWLINE {
+	$$ = new ifpp::Block(ifpp::BLOCK_CONDITIONGROUP, $what, $commandsConditions, $tags);
+}
+
 modifier:
 tags KW_MODIFIER[what] newlines CHR_LEFTBRACKET NEWLINE commandsAny CHR_RIGHTBRACKET NEWLINE {
 	$$ = new ifpp::Block(ifpp::BLOCK_MODIFIER, $what, $commandsAny, $tags);
@@ -330,6 +340,7 @@ tags KW_DEFAULT[what] newlines CHR_LEFTBRACKET NEWLINE commandsDefault CHR_RIGHT
 commandsAny:
 %empty { listNew($$); }
 | commandsAny condition { listAppend($$, $1, $2); }
+| commandsAny conditionGroup { listAppend($$, $1, $2); }
 | commandsAny action { listAppend($$, $1, $2); }
 | commandsAny actionMacro { listMerge($$, $1, $2); }
 | commandsAny rule { listAppend($$, $1, $2); }
@@ -355,6 +366,13 @@ commandsDefault:
 | commandsDefault NEWLINE { listCopy($$, $1); }
 | commandsDefault error NEWLINE { listCopy($$, $1); }
 
+commandsConditions:
+%empty { listNew($$); }
+| commandsConditions condition { listAppend($$, $1, $2); }
+| commandsConditions conditionGroup { listAppend($$, $1, $2); }
+| commandsConditions actionMacro { listMerge($$, $1, $2); }
+| commandsConditions NEWLINE { listCopy($$, $1); }
+| commandsConditions error NEWLINE { listCopy($$, $1); }
 
 
 condition:
@@ -404,6 +422,7 @@ action:
 	{ $$ = new ifpp::ActionEffect($what, $color, "", $tags); }
 | tags AC_PLAYEFFECT[what] CONST_COLOR[color] CONST_TEMP NEWLINE
 	{ $$ = new ifpp::ActionEffect($what, $color, "Temp", $tags); }
+| tags AC_REMOVE[what] actionName[toRemove] NEWLINE { $$ = new ifpp::ActionRemove($what, $toRemove); }
 
 actionMacro:
 tags AC_USEMACRO[what] VARIABLE[varName] NEWLINE {
@@ -416,6 +435,15 @@ tags AC_USEMACRO[what] VARIABLE[varName] NEWLINE {
 		a->tags |= $tags;
 	}
 }
+
+actionName:
+  AC_NUMBER { $$ = $1; }
+| AC_COLOR { $$ = $1; }
+| AC_BOOL { $$ = $1; }
+| AC_SOUND { $$ = $1; }
+| AC_CUSTOMSOUND { $$ = $1; }
+| AC_MINIMAPICON { $$ = $1; }
+| AC_PLAYEFFECT { $$ = $1; }
 
 
 

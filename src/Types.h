@@ -82,6 +82,7 @@ const unsigned int TAG_OVERRIDE = 	1 <<  0;
 const unsigned int TAG_FINAL =		1 <<  1;
 const unsigned int TAG_NODEFAULT =	1 <<  2;
 const unsigned int TAG_REQUIRED =	1 <<  3;
+//const unsigned int TAG_REMOVE =		1 <<  4;
 
 std::ostream & print(std::ostream & os, TagList t);
 
@@ -91,7 +92,7 @@ std::ostream & print(std::ostream & os, TagList t);
 
 enum InstructionType { INS_DEFINITION, INS_BLOCK }; // todo: version, conditional compilation
 enum CommandType { COM_CONDITION, COM_ACTION, COM_BLOCK, COM_IGNORE };
-enum BlockType { BLOCK_GROUP, BLOCK_RULE, BLOCK_MODIFIER, BLOCK_DEFAULT };
+enum BlockType { BLOCK_GROUP, BLOCK_RULE, BLOCK_CONDITIONGROUP, BLOCK_MODIFIER, BLOCK_DEFAULT };
 enum ConditionType { CON_INTERVAL, CON_RARITY, CON_BOOL, CON_NAMELIST, CON_SOCKETGROUP };
 enum ActionType { AC_NUMBER, AC_COLOR, AC_FILE, AC_SOUND, AC_BOOLEAN, AC_STYLE };
 enum ExprType { EXPR_NUMBER, EXPR_COLOR, EXPR_FILE, EXPR_LIST, EXPR_MACRO, EXPR_UNDEFINED };
@@ -252,15 +253,13 @@ struct Action : public Command {
 	virtual Action * clone() const override = 0;
 };
 
-
-
 template<class T1>
 struct Action1 : public Action {
 	T1 arg1;
 
 	Action1(const std::string & w, const T1 & a1, TagList t = 0) :
 		Action(w, t), arg1(a1) {}
-	std::ostream & printSelf(std::ostream & os) const override{
+	std::ostream & printSelf(std::ostream & os) const override {
 		return Action::printSelf(os) << ' ' << arg1 << std::endl;
 	}
 	Action1<T1> * clone() const override {
@@ -327,6 +326,7 @@ typedef Action1<int> ActionNumber;
 typedef Action1<Color> ActionColor;
 typedef Action1<bool> ActionBool;
 typedef Action1<std::string> ActionFile;
+typedef Action1<std::string> ActionRemove;
 typedef Action2<std::string, int> ActionSound;
 typedef Action2<std::string, std::string> ActionEffect;
 typedef Action3<int, std::string, std::string> ActionMapIcon;

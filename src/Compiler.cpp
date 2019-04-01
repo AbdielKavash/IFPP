@@ -71,14 +71,19 @@ Compiles a single top-level IFPP rule and appends the native rules to a filter.
 */
 static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const RuleNative * baseRule = NULL) {
 	RuleNative * base = baseRule ? baseRule->clone() : new RuleNative();
-	//bool hasConditions = false;
+	std::vector<FilterNative> conditionGroups;
+	
+	for (const auto c : outFilter) delete c;
+	outFilter.clear();
+	
 	bool hasDefault = true;
+	bool hasConditions = false;
 	
 	for (const auto c : inBlock->commands) {
 		switch (c->comType) {
 			case COM_CONDITION:
 				base->addCondition(static_cast<Condition *>(c));
-				//hasConditions = true;
+				hasConditions = true;
 				break;
 
 			case COM_ACTION:
@@ -94,6 +99,12 @@ static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const 
 					case BLOCK_RULE:
 					case BLOCK_GROUP:
 						AppendFilter(outFilter, blockFilter);
+						break;
+						
+					case BLOCK_CONDITIONGROUP:
+						// Store all the condition groups first, later we will duplicate the entire rule for each CG.
+						conditionGroups.push_back(blockFilter);
+						hasConditions = true;
 						break;
 						
 					case BLOCK_MODIFIER:
@@ -119,14 +130,29 @@ static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const 
 
 	if (inBlock->blockType == BLOCK_GROUP
 		|| inBlock->hasTag(TAG_NODEFAULT)
-		//|| (inBlock->hasTag(TAG_REQUIRED) && !hasConditions)
+		|| (inBlock->hasTag(TAG_REQUIRED) && !hasConditions)
 		|| !hasDefault
 		|| base->useless
-		|| base->actions.empty()) {
+		//|| base->actions.empty()
+		) {
 		// If any of the conditions above is true, skip the default rule.
 		delete base;
 	} else {
 		outFilter.push_back(base);		
+	}
+	
+	if (!conditionGroups.empty()) {
+		FilterNative filterBase;
+		filterBase.swap(outFilter);
+		
+		for (const auto & cg : conditionGroups) {
+			for (auto r : filterBase) {
+				ModifyRule(outFilter, r, cg);
+			}
+			for (auto r : cg) delete r;
+		}
+		
+		for (auto r : filterBase) delete r;
 	}
 }
 

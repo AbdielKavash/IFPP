@@ -87,6 +87,7 @@ garbage [^ \t\r\n.><={}/#]
 Define			return yy::Parser::make_KW_DEFINE("Define", loc);
 
 Rule			return yy::Parser::make_KW_RULE("Rule", loc);
+ConditionGroup	return yy::Parser::make_KW_CONDITIONGROUP("ConditionGroup", loc);
 Modifier		return yy::Parser::make_KW_MODIFIER("Modifier", loc);
 Group			return yy::Parser::make_KW_GROUP("Group", loc);
 Default			return yy::Parser::make_KW_DEFAULT("Default", loc);
@@ -145,6 +146,7 @@ DisableDropSound	return yy::Parser::make_AC_BOOL("DisableDropSound", loc);
 Hidden			return yy::Parser::make_AC_BOOL("Hidden", loc);
 
 UseMacro		return yy::Parser::make_AC_USEMACRO("UseMacro", loc);
+Remove			return yy::Parser::make_AC_REMOVE("Remove", loc);
 
 Number			return yy::Parser::make_TYPE_NUMBER(ifpp::EXPR_NUMBER, loc);
 Color			return yy::Parser::make_TYPE_COLOR(ifpp::EXPR_COLOR, loc);
