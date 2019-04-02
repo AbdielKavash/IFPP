@@ -82,7 +82,7 @@ const unsigned int TAG_OVERRIDE = 	1 <<  0;
 const unsigned int TAG_FINAL =		1 <<  1;
 const unsigned int TAG_NODEFAULT =	1 <<  2;
 const unsigned int TAG_REQUIRED =	1 <<  3;
-//const unsigned int TAG_REMOVE =		1 <<  4;
+const unsigned int TAG_REMOVE =		1 <<  4;
 
 std::ostream & print(std::ostream & os, TagList t);
 
@@ -277,7 +277,6 @@ struct Action1<bool> : public Action {
 		// Do not print Hidden to native filters, this is handled in compiler.
 		// However it is impractical to remove this action.
 		if (what == "Hidden") return os;
-
 		if (arg1) {
 			// Print this action if it is true.
 			return Action::printSelf(os) << std::endl;
@@ -322,11 +321,21 @@ struct Action3 : public Action {
 	}
 };
 
+struct ActionRemove : public Action {
+	ActionRemove(const std::string & w, TagList t) :
+		Action (w, t | TAG_REMOVE) {}
+	std::ostream & printSelf(std::ostream & os) const override {
+		return os; //Action::printSelf(os) << " Removed" << std::endl;
+	}
+	ActionRemove * clone() const override {
+		return new ActionRemove(what, tags);
+	}
+};
+
 typedef Action1<int> ActionNumber;
 typedef Action1<Color> ActionColor;
 typedef Action1<bool> ActionBool;
 typedef Action1<std::string> ActionFile;
-typedef Action1<std::string> ActionRemove;
 typedef Action2<std::string, int> ActionSound;
 typedef Action2<std::string, std::string> ActionEffect;
 typedef Action3<int, std::string, std::string> ActionMapIcon;

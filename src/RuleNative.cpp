@@ -1,11 +1,11 @@
 #include "RuleNative.h"
 
 namespace ifpp {
-	
+
 /***********
 * TESTING CONTAINMENT OF CONDITIONS
 ***********/
-	
+
 static bool ConditionSubset(const ConditionInterval * small, const ConditionInterval * large) {
 	return large->from <= small->from && small->to <= large->to;
 }
@@ -79,7 +79,7 @@ I.e. anything that is matched by small is also matched by large.
 bool RuleSubset(const RuleNative * small, const RuleNative * large) {
 	for (const auto ci : small->conditions) {
 		const Condition * c = ci.second;
-		
+
 		auto range = large->conditions.equal_range(c->what);
 		if (range.first == range.second) {
 			// The large rule does not have this condition, i.e. matches everything.
@@ -93,14 +93,14 @@ bool RuleSubset(const RuleNative * small, const RuleNative * large) {
 		}
 	}
 	// All conditions have been matched.
-	
+
 	for (const auto ci2 : large->conditions) {
 		// Check that the large rule does not contain any extra conditions.
 		if (small->conditions.find(ci2.first) == small->conditions.end()) {
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -124,7 +124,7 @@ static bool ConditionUseless(const Condition * c) {
 				+ csg->socketGroup.w
 				> getLimit("LinkedSockets", MAX);
 		}
-		case CON_BOOL: // Always matches something.			
+		case CON_BOOL: // Always matches something.
 		case CON_NAMELIST: // We can not determine what this matches.
 			return false;
 		default:
@@ -137,18 +137,19 @@ Always adds a clone of c, if necessary.
 */
 void RuleNative::addCondition(const Condition * c) {
 	auto cOld = conditions.find(c->what);
+
 	if (cOld == conditions.end()) {
-		// We do not have this type of condition yet.		
-		
+		// We do not have this type of condition yet.
+
 		// Add the condition and take ownership.
 		conditions.insert(std::make_pair(c->what, static_cast<Condition *>(c->clone())));
-		
+
 		// Check if the condition matches anything.
 		// We still add it though.
 		if (ConditionUseless(c)) useless = true;
 		return;
 	}
-	
+
 	if (cOld->second->hasTag(TAG_FINAL)) {
 		// Do not override final conditions.
 		return;
@@ -161,7 +162,7 @@ void RuleNative::addCondition(const Condition * c) {
 		if (ConditionUseless(c)) useless = true;
 		return;
 	}
-	
+
 	// Intersect with the old condition
 	switch (c->conType) {
 		case CON_INTERVAL: {
@@ -262,24 +263,26 @@ If the action has the Override tag, replaces an existing action with the same na
 Otherwise the old action is preserved.
 */
 void RuleNative::addAction(const Action * a) {
-	if (a->what == "Remove") {
-		// Remove an action of the specified type - unless it is final.
-		// The Remove action itself is not kept by the rule.
-		auto it = actions.find(static_cast<const ActionRemove *>(a)->arg1);
-		if (it != actions.end() && !it->second->hasTag(TAG_FINAL)) {
-			delete it->second;
-			actions.erase(it);
-		}
+	// Possibly override other actions of the same type.
+	auto it = actions.find(a->what);
+
+	if (it == actions.end()) {
+		// Add a new action.
+		actions.insert(std::make_pair(a->what, static_cast<Action *>(a->clone())));
+		return;
+	}
+
+	if (it->second->hasTag(TAG_FINAL)) {
+		// Cannot override Final actions.
 		return;
 	}
 	
-	// Possibly override other actions of the same type.
-	auto it = actions.find(a->what);
-	if (it != actions.end() && a->hasTag(TAG_OVERRIDE)) {
+	if (it->second->hasTag(TAG_REMOVE) || a->hasTag(TAG_REMOVE) || a->hasTag(TAG_OVERRIDE)) {
+		// Replace the old action.
+		// Note that replacing a removed action with another removed action is possible,
+		// if the newer removed action has different tags.
 		delete it->second;
 		it->second = static_cast<Action *>(a->clone());
-	} else {
-		actions.insert(std::make_pair(a->what, static_cast<Action *>(a->clone())));
 	}
 }
 
@@ -304,7 +307,7 @@ std::ostream & RuleNative::printSelf(std::ostream & os) const {
 		print(os, c.second);
 	}
 	for (const auto & a : actions) {
-		print(os, a.second);
+		if (a.second->what != "Remove") print(os, a.second);
 	}
 	--IFPP_TABS;
 	os << std::endl;
@@ -332,5 +335,5 @@ RuleNative::~RuleNative() {
 	for (auto & c : conditions) delete c.second;
 	for (auto & a : actions) delete a.second;
 }
-	
+
 }

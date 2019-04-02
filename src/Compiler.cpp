@@ -1,7 +1,7 @@
 #include "Compiler.h"
 
 namespace ifpp {
-	
+
 /*
 Appends all rules from the second filter to the first. Clears the second filter.
 Currently there is no optimization being done between different sections - this could be added?
@@ -17,13 +17,13 @@ to optimize situations where the old rule does not match anything after all mods
 */
 static RuleNative * ModifyRule(RuleNative * ruleOld, const RuleNative * modifier) {
 	auto * ruleNew = ruleOld->clone();
-	for (const auto c : modifier->conditions) {
+	for (const auto & c : modifier->conditions) {
 		ruleNew->addCondition(c.second);
 		if (ruleNew->useless) break;
 	}
-	
+
 	if (!ruleNew->useless) {
-		for (const auto a : modifier->actions) {
+		for (const auto & a : modifier->actions) {
 			ruleNew->addAction(a.second);
 		}
 		if (RuleSubset(ruleOld, ruleNew)) ruleOld->useless = true;
@@ -38,7 +38,7 @@ Appends a rule modified by the modifier to the filter.
 static void ModifyRule(FilterNative & outFilter, RuleNative * ruleOld, const FilterNative & modifier) {
 	for (const auto modOld : modifier) {
 		const auto ruleNew = ModifyRule(ruleOld, modOld);
-		
+
 		if (!ruleNew->useless) outFilter.push_back(ruleNew);
 		else delete ruleNew;
 	}
@@ -48,67 +48,74 @@ static void ModifyRule(FilterNative & outFilter, RuleNative * ruleOld, const Fil
 Modifies the first filter by the second (cartesian product).
 Few optimizations are preformed right now, TODO.
 */
-static void ModifyFilter(FilterNative & inFilter, const FilterNative & modifier, bool required) {
-	if (inFilter.empty()) {
-		AppendFilter(inFilter, modifier);
+static void ModifyFilter(FilterNative & outFilter, const FilterNative & modifier, bool required) {
+	/*if (outFilter.empty()) {
+		AppendFilter(outFilter, modifier);
 		return;
-	}
-	
-	FilterNative outFilter;
-	
+	}*/
+
+	FilterNative inFilter;
+	inFilter.swap(outFilter);
+
 	for (auto ruleOld : inFilter) {
 		ModifyRule(outFilter, ruleOld, modifier);
-		
+
 		if (!required && !ruleOld->useless) outFilter.push_back(ruleOld);
 		else delete ruleOld;
 	}
-	
-	inFilter.swap(outFilter);
 }
 
 /*
 Compiles a single top-level IFPP rule and appends the native rules to a filter.
 */
 static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const RuleNative * baseRule = NULL) {
+
 	RuleNative * base = baseRule ? baseRule->clone() : new RuleNative();
 	std::vector<FilterNative> conditionGroups;
-	
+
 	for (const auto c : outFilter) delete c;
 	outFilter.clear();
-	
-	bool hasDefault = true;
-	bool hasConditions = false;
-	
+
+	bool hasDefault = false;
+
 	for (const auto c : inBlock->commands) {
 		switch (c->comType) {
 			case COM_CONDITION:
 				base->addCondition(static_cast<Condition *>(c));
-				hasConditions = true;
+				hasDefault = true;
 				break;
 
 			case COM_ACTION:
 				base->addAction(static_cast<Action *>(c));
+				hasDefault = true;
 				break;
 
 			case COM_BLOCK: {
 				const auto block = static_cast<Block *>(c);
 				FilterNative blockFilter;
-				CompileBlock(blockFilter, block, base);
-				
+				CompileBlock(blockFilter, block,
+					block->blockType == BLOCK_MODIFIER ? NULL : base);
+
 				switch (block->blockType) {
 					case BLOCK_RULE:
 					case BLOCK_GROUP:
 						AppendFilter(outFilter, blockFilter);
 						break;
-						
+
 					case BLOCK_CONDITIONGROUP:
 						// Store all the condition groups first, later we will duplicate the entire rule for each CG.
 						conditionGroups.push_back(blockFilter);
-						hasConditions = true;
 						break;
-						
+
 					case BLOCK_MODIFIER:
 						ModifyFilter(outFilter, blockFilter, block->hasTag(TAG_REQUIRED));
+						if (hasDefault) {
+							// TODO: comment this better.
+							RuleNative * baseCropped = base->clone();
+							ModifyRule(outFilter, baseCropped, blockFilter);
+							if (baseCropped->useless) hasDefault = false;
+							delete baseCropped;
+						}
 						if (block->hasTag(TAG_REQUIRED)) hasDefault = false;
 						break;
 
@@ -128,30 +135,23 @@ static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const 
 		}
 	}
 
-	if (inBlock->blockType == BLOCK_GROUP
-		|| inBlock->hasTag(TAG_NODEFAULT)
-		|| (inBlock->hasTag(TAG_REQUIRED) && !hasConditions)
-		|| !hasDefault
-		|| base->useless
-		//|| base->actions.empty()
-		) {
-		// If any of the conditions above is true, skip the default rule.
-		delete base;
+	if (!inBlock->hasTag(TAG_NODEFAULT) && hasDefault) {
+		outFilter.push_back(base);
 	} else {
-		outFilter.push_back(base);		
+		delete base;
 	}
-	
+
 	if (!conditionGroups.empty()) {
 		FilterNative filterBase;
 		filterBase.swap(outFilter);
-		
+
 		for (const auto & cg : conditionGroups) {
 			for (auto r : filterBase) {
 				ModifyRule(outFilter, r, cg);
 			}
 			for (auto r : cg) delete r;
 		}
-		
+
 		for (auto r : filterBase) delete r;
 	}
 }
@@ -179,7 +179,7 @@ void Compiler::Compile(FilterNative & outFilter, const FilterIFPP & inFilter) {
 						AppendFilter(outFilter, blockFilter);
 						break;
 					}
-						
+
 					default:
 						throw InternalError("Attempting to compile an invalid top-level block!", __FILE__, __LINE__);
 				}

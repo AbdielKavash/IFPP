@@ -1,3 +1,7 @@
 gen/*
 BisonReport.txt
 ifpp.exe
+*.ifpp
+*.filter
+*.log
+*.stackdump

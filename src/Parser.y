@@ -422,7 +422,7 @@ action:
 	{ $$ = new ifpp::ActionEffect($what, $color, "", $tags); }
 | tags AC_PLAYEFFECT[what] CONST_COLOR[color] CONST_TEMP NEWLINE
 	{ $$ = new ifpp::ActionEffect($what, $color, "Temp", $tags); }
-| tags AC_REMOVE[what] actionName[toRemove] NEWLINE { $$ = new ifpp::ActionRemove($what, $toRemove); }
+| tags AC_REMOVE actionName[what] NEWLINE { $$ = new ifpp::ActionRemove($what, $tags); }
 
 actionMacro:
 tags AC_USEMACRO[what] VARIABLE[varName] NEWLINE {
