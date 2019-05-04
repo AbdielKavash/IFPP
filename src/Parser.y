@@ -363,6 +363,9 @@ commandsDefault:
 %empty { listNew($$); }
 | commandsDefault action { listAppend($$, $1, $2); }
 | commandsDefault actionMacro { listMerge($$, $1, $2); }
+| commandsDefault rule { listAppend($$, $1, $2); }
+| commandsDefault modifier { listAppend($$, $1, $2); }
+| commandsDefault group { listAppend($$, $1, $2); }
 | commandsDefault NEWLINE { listCopy($$, $1); }
 | commandsDefault error NEWLINE { listCopy($$, $1); }
 

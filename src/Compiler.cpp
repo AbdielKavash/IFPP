@@ -108,7 +108,13 @@ static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const 
 						break;
 
 					case BLOCK_MODIFIER:
+						if (outFilter.empty()) {
+							outFilter.push_back(base->clone());
+							hasDefault = false;
+						}
+					
 						ModifyFilter(outFilter, blockFilter, block->hasTag(TAG_REQUIRED));
+						/*
 						if (hasDefault) {
 							// TODO: comment this better.
 							RuleNative * baseCropped = base->clone();
@@ -117,6 +123,7 @@ static void CompileBlock(FilterNative & outFilter, const Block * inBlock, const 
 							delete baseCropped;
 						}
 						if (block->hasTag(TAG_REQUIRED)) hasDefault = false;
+						*/
 						break;
 
 					case BLOCK_DEFAULT:

@@ -78,11 +78,11 @@ typedef std::vector<std::string> NameList;
 std::ostream & operator<<(std::ostream & os, const NameList & nl);
 
 typedef unsigned int TagList;
-const unsigned int TAG_OVERRIDE = 	1 <<  0;
-const unsigned int TAG_FINAL =		1 <<  1;
-const unsigned int TAG_NODEFAULT =	1 <<  2;
-const unsigned int TAG_REQUIRED =	1 <<  3;
-const unsigned int TAG_REMOVE =		1 <<  4;
+const unsigned int TAG_OVERRIDE = 	1 << 0;
+const unsigned int TAG_FINAL =		1 << 1;
+const unsigned int TAG_NODEFAULT =	1 << 2;
+const unsigned int TAG_REQUIRED =	1 << 3;
+const unsigned int TAG_REMOVE =		1 << 4;
 
 std::ostream & print(std::ostream & os, TagList t);
 

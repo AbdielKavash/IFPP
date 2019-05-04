@@ -39,6 +39,7 @@ void unputs(const char * s) {
 
 %x comment
 %x nameList
+%x includeFile
 
 blank [ \t\r]
 
@@ -65,6 +66,24 @@ garbage [^ \t\r\n.><={}/#]
 	"*"+[^*/\n]*
 	\n			loc.lines();
 	"*/"        yy_pop_state();
+}
+
+
+Include					yy_push_state(includeFile);
+<includeFile>{blank}*\"
+<includeFile>[^"\r\n]* {
+	yyin = fopen(yytext, "r");
+	if (!yyin) {
+		ctx.errorAt(loc) << "Included file \"" << yytext << "\" not found!" << std::endl;
+	} else {
+		yypush_buffer_state(yy_create_buffer(yyin, YY_BUF_SIZE));
+		yy_push_state(INITIAL);
+	}
+}
+<includeFile>\"{blank}*\n {
+	loc.lines();
+	yy_pop_state();
+	return yy::Parser::make_NEWLINE("\n", loc);
 }
 
 
@@ -218,7 +237,16 @@ x{hex}+				return yy::Parser::make_HEX(yytext + 1, loc);
 
 {garbage}*		ctx.criticalAt(loc) << "String \"" << yytext << "\" not recognized!" << std::endl;
 
-<<EOF>>	return yy::Parser::make_END(loc);
+<<EOF>>	{
+	yypop_buffer_state();
+	if (YY_CURRENT_BUFFER) {
+		// Finished reading an included file, go back to main file.
+		yy_pop_state(); // pops INITIAL from the included file, continue parsing
+	} else {
+		// End of actual input file.
+		return yy::Parser::make_END(loc);
+	}
+}
 
 %%
 
